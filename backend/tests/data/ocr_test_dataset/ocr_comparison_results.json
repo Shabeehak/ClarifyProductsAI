@@ -1,0 +1,20 @@
+{
+  "PaddleOCR": {
+    "accuracy": 48.275862068965516,
+    "total_tests": 29,
+    "correct": 14,
+    "avg_time_ms": 6933.606821915199,
+    "avg_confidence": 0.8576072160040639,
+    "errors": []
+  },
+  "EasyOCR": {
+    "accuracy": 46.42857142857143,
+    "total_tests": 28,
+    "correct": 13,
+    "avg_time_ms": 9066.141401018414,
+    "avg_confidence": 0.5825066422019496,
+    "errors": [
+      "maybellline_concealor.jpg"
+    ]
+  }
+}

@@ -1,0 +1,1 @@
+"""ClarifyProducts.AI Backend Application"""

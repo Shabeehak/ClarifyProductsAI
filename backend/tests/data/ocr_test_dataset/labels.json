@@ -1,0 +1,213 @@
+{
+  "dataset_info": {
+    "name": "Product OCR Test Dataset",
+    "description": "Test dataset for comparing OCR engines on product images",
+    "created_date": "2025-01-25",
+    "total_images": 29
+  },
+  "images": [
+    {
+      "image_path": "high_quality/advanced_snail_92_all_in_one_cream.jpg",
+      "expected_text": "Advanced Snail 92 All In One Cream",
+      "category": "skincare",
+      "quality": "high",
+      "notes": "Amazon product image"
+    },
+    {
+      "image_path": "high_quality/ANUA_Heartleaf_Quercetinol_Pore_Deep_Cleansing_Foam.jpg",
+      "expected_text": "Anua Heartleaf Quercetinol Pore Deep Cleansing Foam",
+      "category": "skincare",
+      "quality": "high",
+      "notes": "Amazon product image.jpg"
+    },
+    {
+      "image_path": "high_quality/aveeno_daily_moisturizing_body_lotion.jpg",
+      "expected_text": "Aveeno Daily Moisturizing Body Lotion",
+      "category": "skincare",
+      "quality": "high",
+      "notes": "Amazon product image"
+    },
+    {
+      "image_path": "high_quality/body_shop_skin_clearing_body_wash.jpg",
+      "expected_text": "Body Shop Skin Clearing Body Wash",
+      "category": "skincare",
+      "quality": "high",
+      "notes": "Amazon product image"
+    },
+    {
+      "image_path": "high_quality/cetaphile_gentle_skin_cleanser.jpg",
+      "expected_text": "Cetaphile Gentle Skin Cleanser",
+      "category": "skincare",
+      "quality": "high",
+      "notes": "Amazon product image"
+    },
+    {
+      "image_path": "high_quality/e.l.f. Glow Reviver Lip Oil.jpg",
+      "expected_text": "E.L.F. Glow Reviver Lip Oil",
+      "category": "makeup",
+      "quality": "high",
+      "notes": "Amazon product image"
+    },
+    {
+      "image_path": "high_quality/farmacy_honey_halo_moisturizer.jpg",
+      "expected_text": "Farmacy Honey Halo Moisturizer",
+      "category": "skincare",
+      "quality": "high",
+      "notes": "Amazon product image"
+    },
+    {
+      "image_path": "high_quality/garnier_micellar_cleansing_water.jpg",
+      "expected_text": "Garnier Micellar Cleansing Water",
+      "category": "skincare",
+      "quality": "high",
+      "notes": "Amazon product image"
+    },
+    {
+      "image_path": "high_quality/Maybelline Instant Anti-Age Eraser Eye Concealer for Face.jpg",
+      "expected_text": "Maybelline Instant Anti-Age Eraser Eye Concealer For Face]",
+      "category": "makeup",
+      "quality": "high",
+      "notes": "Amazon product image"
+    },
+    {
+      "image_path": "high_quality/neutrogena_hydro_boost_hydrating_lotion.jpg",
+      "expected_text": "Neutrogena Hydro Boost Hydrating Lotion",
+      "category": "skincare",
+      "quality": "high",
+      "notes": "Amazon product image"
+    },
+    {
+      "image_path": "high_quality/neutrogena_retinol_boost_nigth_cream.jpg",
+      "expected_text": "Neutrogena Retinol Boost Nigth Cream",
+      "category": "skincare",
+      "quality": "high",
+      "notes": "Amazon product image"
+    },
+    {
+      "image_path": "high_quality/ordinary_multi_peptide_eye_serum.jpg",
+      "expected_text": "Ordinary Multi Peptide Eye Serum",
+      "category": "skincare",
+      "quality": "high",
+      "notes": "Amazon product image"
+    },
+    {
+      "image_path": "high_quality/Ordinary_natural_moisturizing.jpg",
+      "expected_text": "Ordinary Natural Moisturizing",
+      "category": "skincare",
+      "quality": "high",
+      "notes": "Amazon product image"
+    },
+    {
+      "image_path": "medium_quality/samsung_galaxy_mega_g3.jpg",
+      "expected_text": "Samsung Galaxy Mega G3",
+      "category": "electronics",
+      "quality": "medium",
+      "notes": "Google Image"
+    },
+    {
+      "image_path": "medium_quality/book_majestic.jpg",
+      "expected_text": "The Majestic Quran A Plain English Translation by Musharraf Hussain",
+      "category": "book",
+      "quality": "medium",
+      "notes": "Amazon Review Image"
+    },
+    {
+      "image_path": "medium_quality/cat_food_gourmet_perle_collection.jpg",
+      "expected_text": "Purina Gourmet Perle Chef's Collection 40 pouches",
+      "category": "cat food",
+      "quality": "medium",
+      "notes": "Amazon Review Image"
+    },
+    {
+      "image_path": "medium_quality/chia_seeds_yin&yang.jpg",
+      "expected_text": "Yin & Yang Superfoods 100% Natural Chia Seeds",
+      "category": "food",
+      "quality": "medium",
+      "notes": "Amazon Review Image"
+    },
+    {
+      "image_path": "medium_quality/corn_flakes_briggen.jpeg",
+      "expected_text": "Brüggen Corn Flakes",
+      "category": "food",
+      "quality": "medium",
+      "notes": "Amazon Review Image"
+    },
+    {
+      "image_path": "medium_quality/kellogs_rice_krispies.jpg",
+      "expected_text": "Kellogg's Rice Krispies Multigrain Shapes cereal",
+      "category": "food",
+      "quality": "medium",
+      "notes": "Amazon Review Image"
+    },
+    {
+      "image_path": "medium_quality/minimalist_vitamin_c.jpg",
+      "expected_text": "Minimalist Vitamin C",
+      "category": "skincare",
+      "quality": "medium",
+      "notes": "Amazon Review Image"
+    },
+    {
+      "image_path": "medium_quality/neutogena_hydro_boost_body_gel_cream.jpg",
+      "expected_text": "Neutogena Hydro Boost Body Gel Cream",
+      "category": "skincare",
+      "quality": "medium",
+      "notes": "Amazon Review Image"
+    },
+    {
+      "image_path": "medium_quality/neutrogena_retnol_boost.jpg",
+      "expected_text": "Neutrogena Retinol Boost Serum",
+      "category": "skincare",
+      "quality": "medium",
+      "notes": "Amazon Review Image"
+    },
+    {
+      "image_path": "medium_quality/pantene_bond_repair.jpg",
+      "expected_text": "Pantene Bond Repair",
+      "category": "haircare",
+      "quality": "medium",
+      "notes": "Amazon Review Image"
+    },
+    {
+      "image_path": "medium_quality/perfect_fit_cat_1kg_food.jpg",
+      "expected_text": "Perfect Fit Adult 1+ Complete Dry Cat Food",
+      "category": "cat food",
+      "quality": "medium",
+      "notes": "Amazon Review Image"
+    },
+    {
+      "image_path": "low_quality/kismet_hand&lotion.jpg",
+      "expected_text": " Kismet hand and body lotion",
+      "category": "skincare",
+      "quality": "low",
+      "notes": "Amazon Review Image"
+    },
+    {
+      "image_path": "low_quality/maybellline_concealor.jpg",
+      "expected_text": "Maybelline Instant Age Rewind Eraser Concealer",
+      "category": "makeup",
+      "quality": "low",
+      "notes": "Google Image"
+    },
+    {
+      "image_path": "low_quality/nutrific_breakfast.jpg",
+      "expected_text": "Nutrific Golden Crispy Cornflakes",
+      "category": "food",
+      "quality": "low",
+      "notes": "Google Image"
+    },
+    {
+      "image_path": "low_quality/sunfoil_pure_sunflower_oil.jpg",
+      "expected_text": "Sunfoil Pure Sunflower Oil",
+      "category": "food",
+      "quality": "low",
+      "notes": "Google Image"
+    },
+    {
+      "image_path": "low_quality/trend_organic-ground.jpg",
+      "expected_text": "Trend Organic Ground Flaxseed",
+      "category": "food",
+      "quality": "low",
+      "notes": "Google Image"
+    }
+  ]
+}

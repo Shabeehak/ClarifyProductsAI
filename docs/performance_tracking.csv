@@ -1,0 +1,2 @@
+Date,Week,CLIP_Load_s,CLIP_Avg_ms,CLIP_P95_ms,CLIP_Memory_MB,Sentiment_Avg_ms,Sentiment_Batch_s,Summary_Avg_s,Errors_Count,Notes,Log_File
+2025-10-19,42,13.75,250,320,1200,75,4.2,5.5,0,Baseline after logging improvements - test_ml_logging.py,test_output_2025-10-19.log
