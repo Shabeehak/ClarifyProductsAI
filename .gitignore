@@ -35,6 +35,11 @@ data/*
 !data/.gitkeep
 notebooks/.ipynb_checkpoints/
 
+# Downloaded ML models (Hugging Face cache) - will be managed by MLflow in Day 7
+backend/models/summarization/
+backend/models/sentiment/
+backend/models/clip/
+
 # Environment variables
 .env
 .env.local

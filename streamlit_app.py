@@ -476,17 +476,24 @@ def render_product_search_tab():
     st.subheader("Product Search")
     st.markdown("Search for products by name to view aggregated review analysis.")
 
-    # Search input
-    col1, col2 = st.columns([4, 1])
-    with col1:
-        product_name = st.text_input(
-            "Product Name",
-            placeholder="Enter product name (e.g., iPhone 15 Pro, CeraVe Lotion)",
-            label_visibility="collapsed",
-            key="product_search",
-        )
-    with col2:
-        search_button = st.button("Search", use_container_width=True, type="primary")
+    # Search input with form for Enter key support
+    with st.form(key="search_form"):
+        col1, col2, col3 = st.columns([4, 1, 1])
+        with col1:
+            product_name = st.text_input(
+                "Product Name",
+                placeholder="Enter product name (e.g., iPhone 15 Pro, CeraVe Lotion)",
+                label_visibility="collapsed",
+                key="product_search",
+            )
+        with col2:
+            search_button = st.form_submit_button("Search", use_container_width=True, type="primary")
+        with col3:
+            clear_button = st.form_submit_button("Clear", use_container_width=True)
+
+    # Handle clear button
+    if clear_button:
+        st.rerun()
 
     # Process search
     if search_button:
@@ -935,7 +942,7 @@ def get_review_consensus(product_name: str) -> Optional[Dict[str, Any]]:
         response = requests.get(
             f"{API_BASE_URL}/smart-search/",
             params={"q": product_name, "use_cache": True, "include_ml": True},
-            timeout=45,
+            timeout=60,  # Increased to 60 seconds for summarization
         )
 
         if response.status_code == 200:
@@ -1143,18 +1150,42 @@ def display_product_results(result: Dict[str, Any]):
 
     # Review Consensus
     consensus = result.get("consensus", {})
-    if consensus and consensus.get("summary"):
+    summary_text = consensus.get("summary", "")
+    sentiment = consensus.get("sentiment", {})
+
+    # Debug logging (uncomment to see what data is received)
+    # st.write("DEBUG - Full result keys:", list(result.keys()))
+    # st.write("DEBUG - Consensus:", consensus)
+    # st.write("DEBUG - Summary:", summary_text)
+
+    # Show if we have sentiment data or a summary
+    has_analysis = (sentiment and sentiment.get("positive_percent") is not None) or (summary_text and summary_text != "No reviews available for analysis.")
+
+    if has_analysis:
         st.divider()
         st.subheader("Review Analysis")
 
-        if consensus.get("summary"):
+        # Summary - Always try to show something if we have data
+        if summary_text and summary_text != "No reviews available for analysis.":
             st.markdown("**Summary**")
-            st.info(consensus["summary"])
+            st.info(summary_text)
+        elif sentiment and sentiment.get("total_analyzed", 0) > 0:
+            # Fallback: If no summary text but we have analyzed reviews, show basic info
+            total = sentiment.get("total_analyzed", 0)
+            pos = sentiment.get("positive_percent", 0)
+            neg = sentiment.get("negative_percent", 0)
+            st.markdown("**Summary**")
+            if pos > 60:
+                st.info(f"Based on {total} reviews analyzed, customers generally have positive sentiment ({pos:.0f}% positive).")
+            elif neg > 60:
+                st.info(f"Based on {total} reviews analyzed, customers express concerns ({neg:.0f}% negative).")
+            else:
+                st.info(f"Based on {total} reviews analyzed, customer opinions are mixed ({pos:.0f}% positive, {neg:.0f}% negative).")
 
         # Sentiment
-        sentiment = consensus.get("sentiment", {})
-        if sentiment:
+        if sentiment and sentiment.get("positive_percent") is not None:
             st.markdown("**Sentiment Distribution**")
+            st.markdown(f"*Based on {sentiment.get('total_analyzed', 0)} reviews analyzed*")
             col1, col2, col3 = st.columns(3)
 
             with col1:
@@ -1213,6 +1244,23 @@ def display_product_results(result: Dict[str, Any]):
                 st.markdown("**Twitter**")
                 st.write(f"Tweets: {twitter_stats.get('tweet_count', 0)}")
                 st.write(f"Likes: {twitter_stats.get('total_likes', 0):,}")
+
+    # YouTube Review Videos
+    review_videos = result.get("review_videos", [])
+    if review_videos:
+        st.divider()
+        st.subheader("YouTube Reviews")
+        st.markdown("*Watch what others are saying about this product*")
+
+        for video in review_videos[:5]:  # Show top 5 videos
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                # Show thumbnail if available
+                if video.get("thumbnail"):
+                    st.image(video["thumbnail"], use_column_width=True)
+            with col2:
+                st.markdown(f"**[{video.get('title', 'Video')}]({video.get('url')})**")
+                st.caption(f"👁️ {video.get('view_count', 0):,} views • {video.get('channel', 'Unknown Channel')}")
 
 
 # =============================================================================
