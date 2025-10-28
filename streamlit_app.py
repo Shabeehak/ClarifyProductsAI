@@ -1,231 +1,534 @@
 """
-ClarifyProducts.AI - Streamlit Frontend
-Product Review Consensus Platform
+ClarifyProducts.AI - Professional Streamlit Frontend
+Product Review Intelligence Platform
+
+A clean, professional interface for product review analysis
+without unnecessary decorations or fake metrics.
 """
+
 import streamlit as st
 import requests
 from PIL import Image
 import io
 import os
+from typing import Optional, Dict, Any
+import time
 
-# Page configuration
+# =============================================================================
+# PAGE CONFIGURATION
+# =============================================================================
+
 st.set_page_config(
-    page_title="ClarifyProducts.AI - Review Consensus",
-    page_icon="🔍",
+    page_title="ClarifyProducts.AI - Review Intelligence",
+    page_icon="assets/favicon.jpg",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded",
 )
 
-# API Configuration
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000/api/v1")
 
-# Custom CSS for modern interface
-st.markdown("""
+# =============================================================================
+# PROFESSIONAL STYLING
+# =============================================================================
+
+st.markdown(
+    """
 <style>
-    /* Main container */
+    /* Clean, professional theme */
     .main {
+        background-color: #ffffff;
+    }
+
+    /* Header */
+    .app-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 2rem;
-    }
-
-    /* Logo and title */
-    .logo-container {
-        text-align: center;
-        margin-bottom: 3rem;
-    }
-            
-
-    .main-title {
-        font-size: 3.5rem;
-        font-weight: 800;
-        color: white;
-        margin-bottom: 0.5rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .subtitle {
-        font-size: 1.3rem;
-        color: rgba(255, 255, 255, 0.9);
-        font-weight: 300;
-    }
-
-    /* Search box container */
-    .search-container {
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        border-radius: 8px;
         margin-bottom: 2rem;
+        text-align: center;
+        color: white;
     }
 
-    /* Result container */
-    .result-box {
-        background: white;
-        border-radius: 15px;
-        margin-top: 2rem;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    .app-title {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
     }
 
-    .consensus-positive {
-        color: #10b981;
-        font-weight: bold;
+    .app-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
     }
 
-    .consensus-negative {
-        color: #ef4444;
-        font-weight: bold;
+    /* Professional cards */
+    .info-card {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 6px;
+        border-left: 3px solid #667eea;
+        margin: 0.5rem 0;
     }
 
-    .consensus-neutral {
-        color: #f59e0b;
-        font-weight: bold;
+    /* Metrics */
+    div[data-testid="stMetricValue"] {
+        font-size: 1.8rem;
     }
 
     /* Buttons */
     .stButton > button {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: #667eea;
         color: white;
-        font-size: 1.1rem;
-        font-weight: 600;
         border: none;
-        border-radius: 10px;
-        padding: 0.8rem 2rem;
-        width: 100%;
+        border-radius: 6px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
     }
 
     .stButton > button:hover {
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        transform: translateY(-2px);
+        background: #5568d3;
     }
 
-    /* Input fields */
-    .stTextInput > div > div > input {
-        font-size: 1.1rem;
-        padding: 1rem;
-        border-radius: 10px;
-        border: 2px solid #e5e7eb;
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 4px;
     }
 
-    .stTextInput > div > div > input:focus {
-        border-color: #667eea;
+    .stTabs [data-baseweb="tab"] {
+        background-color: #f8f9fa;
+        border-radius: 6px 6px 0 0;
+        padding: 10px 20px;
+        font-weight: 500;
     }
 
-    /* Feature cards */
-    .feature-card {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 1.5rem;
-        border-radius: 12px;
-        text-align: center;
-        margin-bottom: 1rem;
-        transition: transform 0.2s;
+    .stTabs [aria-selected="true"] {
+        background-color: #667eea;
+        color: white;
     }
 
-    .feature-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
+    /* Hide default menu */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
 
-    .feature-icon {
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .feature-title {
-        font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 0.5rem;
-    }
-
-    /* Modern Chatbot Widget Styles */
-    .chatbot-widget-container {
+    /* Enhanced Clickable Chatbot Card - More Visible & Engaging */
+    .chatbot-card {
         position: fixed;
         bottom: 30px;
         right: 30px;
-        z-index: 9999;
+        z-index: 999;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 16px 24px;
+        border-radius: 50px;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        animation: bounce 2s ease-in-out infinite;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        max-width: 280px;
     }
 
-    .chat-toggle-button {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6);
+        }
+        50% {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.8);
+        }
+    }
+
+    .chatbot-card:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 12px 32px rgba(102, 126, 234, 0.9);
+        animation: none;
+    }
+
+    .chatbot-card-icon {
+        font-size: 32px;
+        flex-shrink: 0;
+        animation: wave 1.5s ease-in-out infinite;
+    }
+
+    @keyframes wave {
+        0%, 100% {
+            transform: rotate(0deg);
+        }
+        25% {
+            transform: rotate(-15deg);
+        }
+        75% {
+            transform: rotate(15deg);
+        }
+    }
+
+    .chatbot-card-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .chatbot-card-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .chatbot-card-subtitle {
+        font-size: 0.8rem;
+        opacity: 0.95;
+        line-height: 1.2;
+    }
+
+    /* Pulsing glow effect */
+    .chatbot-card::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 50px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        cursor: pointer;
+        opacity: 0;
+        animation: pulse-glow 2s ease-in-out infinite;
+        z-index: -1;
+    }
+
+    @keyframes pulse-glow {
+        0%, 100% {
+            opacity: 0;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.5;
+            transform: scale(1.05);
+        }
+    }
+
+    /* Full-Screen Chatbot Overlay (Claude AI / ChatGPT style) */
+    .chatbot-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9998;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
-        transition: all 0.3s ease;
-        font-size: 28px;
+        backdrop-filter: blur(5px);
     }
 
-    .chat-toggle-button:hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.7);
+    .chatbot-container {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 50%;
+        height: 100%;
+        background: #ffffff;
+        box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+        }
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    .chatbot-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 24px 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .chatbot-header-content {
+        flex: 1;
+    }
+
+    .chatbot-title {
+        font-weight: 600;
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+    }
+
+    .chatbot-subtitle {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        line-height: 1.4;
+        font-style: italic;
+    }
+
+    .chatbot-close {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        font-size: 28px;
+        cursor: pointer;
+        padding: 8px 12px;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+
+    .chatbot-close:hover {
+        background: rgba(255,255,255,0.3);
+        transform: rotate(90deg);
+    }
+
+    .chatbot-body {
+        padding: 32px;
+        overflow-y: auto;
+        flex: 1;
+        background: #f9fafb;
+    }
+
+    .chatbot-welcome {
+        text-align: center;
+        padding: 60px 20px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .chatbot-welcome-icon {
+        font-size: 64px;
+        margin-bottom: 24px;
+        opacity: 0.8;
+    }
+
+    .chatbot-welcome-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 16px;
+    }
+
+    .chatbot-welcome-text {
+        font-size: 1rem;
+        color: #6b7280;
+        line-height: 1.6;
+        margin-bottom: 32px;
+    }
+
+    .chatbot-suggestions {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .chatbot-suggestion-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: left;
+    }
+
+    .chatbot-suggestion-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .chatbot-input-container {
+        padding: 24px 32px;
+        background: white;
+        border-top: 1px solid #e5e7eb;
     }
 
     /* Mobile responsive */
     @media (max-width: 768px) {
-        .chatbot-widget-container {
-            bottom: 20px;
-            right: 20px;
+        .chatbot-container {
+            width: 100%;
         }
 
-        .chat-toggle-button {
-            width: 50px;
-            height: 50px;
+        .chatbot-card {
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 18px;
+            max-width: 220px;
+        }
+
+        .chatbot-card-icon {
+            font-size: 28px;
+        }
+
+        .chatbot-card-title {
+            font-size: 0.85rem;
+        }
+
+        .chatbot-card-subtitle {
+            font-size: 0.75rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .chatbot-card {
+            padding: 10px 16px;
+            max-width: 200px;
+        }
+
+        .chatbot-card-icon {
             font-size: 24px;
+        }
+
+        .chatbot-card-title {
+            font-size: 0.8rem;
+        }
+
+        .chatbot-card-subtitle {
+            font-size: 0.7rem;
         }
     }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
-def main():
-    """Main application"""
+# =============================================================================
+# SIDEBAR
+# =============================================================================
 
-    # Logo and Title
-    st.markdown("""
-    <div class="logo-container">
-        <div class="main-title"> ClarifyProducts.AI</div>
-        <div class="subtitle">Discover what real people think about products</div>
-    </div>
-    """, unsafe_allow_html=True)
 
-    # Main search container
-    with st.container():
-        st.markdown('<div class="search-container">', unsafe_allow_html=True)
+def render_sidebar():
+    """Render simplified sidebar with only essential information"""
+    with st.sidebar:
+        st.markdown("### System")
 
-        st.markdown("### Enter Product Name")
+        # API Health Check
+        try:
+            response = requests.get(
+                f"{API_BASE_URL.replace('/api/v1', '')}/health", timeout=2
+            )
+            if response.status_code == 200:
+                st.success("API: Connected")
+            else:
+                st.error("API: Error")
+        except:
+            st.warning("API: Offline")
 
-        # Product name input
-        product_name = st.text_input(
-            "Enter product name",
-            placeholder="e.g., CeraVe Moisturizing Lotion, iPhone 15 Pro, AirPods Pro...",
-            label_visibility="collapsed",
-            key="product_input"
+        st.markdown("---")
+
+        # About (minimal)
+        st.markdown("### About")
+        st.markdown(
+            """
+This platform analyzes product reviews from multiple sources using AI to provide:
+
+- Comprehensive review summaries
+- Sentiment analysis
+- Purchase recommendations
+- Multi-source data aggregation
+        """
         )
 
-        col1, col2, col3 = st.columns([1, 2, 1])
 
-        with col2:
-            search_button = st.button(" Get Review Consensus", use_container_width=True, type="primary")
+# =============================================================================
+# HEADER
+# =============================================================================
 
-        st.markdown('</div>', unsafe_allow_html=True)
+
+def render_header():
+    """Render application header"""
+    st.markdown(
+        """
+    <div class="app-header">
+        <div class="app-title">ClarifyProducts.AI</div>
+        <div class="app-subtitle">
+            Product Review Intelligence Platform
+        </div>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
+
+
+# =============================================================================
+# TAB 1: PRODUCT SEARCH
+# =============================================================================
+
+
+def render_product_search_tab():
+    """Render product search functionality"""
+    st.subheader("Product Search")
+    st.markdown("Search for products by name to view aggregated review analysis.")
+
+    # Search input
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        product_name = st.text_input(
+            "Product Name",
+            placeholder="Enter product name (e.g., iPhone 15 Pro, CeraVe Lotion)",
+            label_visibility="collapsed",
+            key="product_search",
+        )
+    with col2:
+        search_button = st.button("Search", use_container_width=True, type="primary")
 
     # Process search
-    if search_button and product_name:
-        get_review_consensus(product_name)
+    if search_button:
+        if product_name:
+            with st.spinner("Searching and analyzing reviews..."):
+                # Show what's happening
+                status = st.empty()
+                status.info("Step 1/3: Searching product database...")
+                time.sleep(0.5)
+                status.info("Step 2/3: Aggregating reviews from multiple sources...")
 
-    # Alternative: Image Upload
-    st.markdown('<div class="search-container">', unsafe_allow_html=True)
-    st.markdown("### Or upload a product image")
+                result = get_review_consensus(product_name)
+
+                if result:
+                    status.info("Step 3/3: Analyzing sentiment and generating insights...")
+                    time.sleep(0.3)
+                    status.empty()
+                    display_product_results(result)
+                else:
+                    status.empty()
+        else:
+            st.warning("Please enter a product name.")
+
+
+# =============================================================================
+# TAB 2: IMAGE RECOGNITION
+# =============================================================================
+
+
+def render_image_recognition_tab():
+    """Render image recognition functionality"""
+    st.subheader("Image Recognition")
+    st.markdown("Upload a product image for automatic identification and review analysis.")
 
     col1, col2 = st.columns([2, 1])
 
     with col1:
         uploaded_file = st.file_uploader(
-            "Take a photo or upload an image of the product",
+            "Upload Product Image",
             type=["jpg", "jpeg", "png"],
-            label_visibility="collapsed"
+            help="Supported: JPG, JPEG, PNG (max 10MB)",
+            label_visibility="collapsed",
         )
 
     if uploaded_file:
@@ -233,500 +536,718 @@ def main():
             image = Image.open(uploaded_file)
             st.image(image, caption="Uploaded Image", use_column_width=True)
 
-        if st.button(" Identify & Get Reviews", use_container_width=True):
-            identify_and_get_reviews(image)
+        if st.button("Analyze Image", use_container_width=True, type="primary"):
+            with st.spinner("Processing image..."):
+                status = st.empty()
+                status.info("Step 1/3: Analyzing image with AI vision...")
+                time.sleep(0.5)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+                result = identify_and_get_reviews(image)
 
-    # Chatbot Widget Button
-    st.markdown('<div class="search-container">', unsafe_allow_html=True)
-    st.markdown("### Need more help?")
+                if result:
+                    status.info("Step 2/3: Fetching product reviews...")
+                    time.sleep(0.5)
+                    status.info("Step 3/3: Generating insights...")
+                    time.sleep(0.3)
+                    status.empty()
 
-    col1, col2, col3 = st.columns([1, 2, 1])
-
-    with col2:
-        if st.button(" Chat with AI Assistant", use_container_width=True, key="chat_toggle"):
-            st.session_state.show_chatbot = not st.session_state.get('show_chatbot', False)
-            st.rerun()
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # Show chatbot modal if requested
-    if st.session_state.get('show_chatbot', False):
-        show_modern_chatbot()
-
-    # Features Section
-    st.markdown("---")
-    st.markdown("### Why ClarifyProducts.AI?")
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.markdown("""
-        <div class="feature-card">
-            <div class="feature-icon">🤖</div>
-            <div class="feature-title">AI-Powered Analysis</div>
-            <p>Advanced RAG technology analyzes thousands of reviews to give you accurate consensus</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col2:
-        st.markdown("""
-        <div class="feature-card">
-            <div class="feature-icon">📸</div>
-            <div class="feature-title">Image Recognition</div>
-            <p>Just snap a photo - our AI identifies the product and fetches reviews instantly</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col3:
-        st.markdown("""
-        <div class="feature-card">
-            <div class="feature-icon">💬</div>
-            <div class="feature-title">Ask Anything</div>
-            <p>Chat with our AI to get specific answers about product features and concerns</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-
-def get_review_consensus(product_name: str):
-    """Get review consensus for a product using smart search"""
-    with st.spinner(f"Searching for {product_name}..."):
-        try:
-            # First try smart search (with typo tolerance)
-            response = requests.get(
-                f"{API_BASE_URL}/smart-search/",
-                params={
-                    "q": product_name,
-                    "use_cache": True,
-                    "include_ml": True
-                },
-                timeout=30
-            )
-
-            if response.status_code == 200:
-                result = response.json()
-
-                # Display results
-                st.markdown('<div class="result-box">', unsafe_allow_html=True)
-
-                # Show if typo was corrected
-                if result.get('suggestions') and result['product_name'].lower() != product_name.lower():
-                    st.info(f"💡 Showing results for: **{result['product_name']}** (corrected from '{product_name}')")
-
-                # Product header
-                product = result.get('product', {})
-                st.markdown(f"## 🔍 {product.get('name', result.get('product_name', 'Unknown'))}")
-
-                # Show product images if available
-                if product.get('images'):
-                    cols = st.columns(min(len(product['images']), 4))
-                    for idx, img in enumerate(product['images'][:4]):
-                        with cols[idx]:
-                            st.image(img.get('url'), use_column_width=True)
-
-                st.markdown("---")
-
-                # Rating, Review Count, and Recommendation
-                col1, col2, col3, col4 = st.columns(4)
-                with col1:
-                    rating = product.get('overall_rating', 0)
-                    st.metric("⭐ Rating", f"{rating:.1f}/5.0")
-                with col2:
-                    review_count = product.get('total_reviews', 0)
-                    st.metric("📊 Total Reviews", f"{review_count:,}")
-                with col3:
-                    recommendation = product.get('recommendation', {})
-                    rec_badge = recommendation.get('badge', 'N/A')
-                    st.metric("💡 Verdict", rec_badge)
-                with col4:
-                    cache_status = "🚀 Cached" if result.get('metadata', {}).get('from_cache', False) else "🆕 Fresh"
-                    st.metric("Status", cache_status)
-
-                # Show recommendation details
-                if recommendation:
-                    decision = recommendation.get('decision')
-                    confidence = recommendation.get('confidence', 0)
-                    reason = recommendation.get('reason', '')
-
-                    if decision == 'buy':
-                        st.success(f"✅ **{rec_badge}** ({confidence:.0f}% confidence)\n\n{reason}")
-                    elif decision == 'consider':
-                        st.info(f"👍 **{rec_badge}** ({confidence:.0f}% confidence)\n\n{reason}")
-                    elif decision == 'wait':
-                        st.warning(f"⏳ **{rec_badge}** ({confidence:.0f}% confidence)\n\n{reason}")
-                    elif decision == 'skip':
-                        st.error(f"❌ **{rec_badge}** ({confidence:.0f}% confidence)\n\n{reason}")
-                    else:
-                        st.info(f"ℹ️ **{rec_badge}**\n\n{reason}")
-
-                # Review Consensus Section
-                consensus = result.get('consensus', {})
-                if consensus and consensus.get('summary'):
-                    st.markdown("---")
-                    st.markdown("### 🤖 Review Consensus")
-
-                    # Summary
-                    if consensus.get('summary'):
-                        st.markdown("#### 📝 What People Are Saying")
-                        st.info(consensus['summary'])
-
-                    # Sentiment Breakdown
-                    sentiment = consensus.get('sentiment', {})
-                    if sentiment:
-                        st.markdown("#### 📊 Sentiment Distribution")
-
-                        col1, col2, col3 = st.columns(3)
-                        with col1:
-                            st.metric("👍 Positive", f"{sentiment.get('positive_percent', 0):.0f}%",
-                                     delta=None, delta_color="normal")
-                        with col2:
-                            st.metric("😐 Neutral", f"{sentiment.get('neutral_percent', 0):.0f}%")
-                        with col3:
-                            st.metric("👎 Negative", f"{sentiment.get('negative_percent', 0):.0f}%",
-                                     delta=None, delta_color="inverse")
-
-                    # Pros and Cons
-                    if consensus.get('pros') or consensus.get('cons'):
-                        st.markdown("---")
-                        col1, col2 = st.columns(2)
-
-                        with col1:
-                            st.markdown("#### ✅ Pros")
-                            if consensus.get('pros'):
-                                for pro in consensus['pros']:
-                                    st.write(f"• {pro}")
-                            else:
-                                st.write("_No specific pros extracted_")
-
-                        with col2:
-                            st.markdown("#### ❌ Cons")
-                            if consensus.get('cons'):
-                                for con in consensus['cons']:
-                                    st.write(f"• {con}")
-                            else:
-                                st.write("_No specific cons extracted_")
-
-                # YouTube Review Videos
-                review_videos = result.get('review_videos', [])
-                if review_videos:
-                    st.markdown("---")
-                    st.markdown("### 🎥 YouTube Review Videos")
-
-                    for video in review_videos[:3]:  # Show top 3
-                        with st.expander(f"🎬 {video.get('title', 'Video')} - {video.get('channel', 'Unknown')}"):
-                            col1, col2 = st.columns([1, 2])
-
-                            with col1:
-                                if video.get('thumbnail'):
-                                    st.image(video['thumbnail'], use_column_width=True)
-
-                            with col2:
-                                st.markdown(f"**Channel:** {video.get('channel', 'Unknown')}")
-                                st.markdown(f"**Views:** {video.get('views', 0):,}")
-                                st.markdown(f"**URL:** [{video.get('url', '')}]({video.get('url', '')})")
-                                if video.get('has_transcript'):
-                                    st.success("✅ Has transcript")
-                                else:
-                                    st.info("ℹ️ No transcript available")
-
-                # Show source statistics
-                sources = result.get('sources', {})
-                if sources:
-                    st.markdown("---")
-                    st.markdown("### 📚 Review Sources")
-
-                    col1, col2, col3 = st.columns(3)
-
-                    # YouTube stats
-                    youtube_stats = sources.get('youtube', {})
-                    if youtube_stats.get('has_data'):
-                        with col1:
-                            st.markdown("#### Youtube")
-                            st.write(f"**Videos:** {youtube_stats.get('video_count', 0)}")
-                            st.write(f"**Total Views:** {youtube_stats.get('total_views', 0):,}")
-
-                    # Reddit stats
-                    reddit_stats = sources.get('reddit', {})
-                    if reddit_stats.get('has_data'):
-                        with col2:
-                            st.markdown("#### Reddit")
-                            st.write(f"**Posts:** {reddit_stats.get('post_count', 0)}")
-                            st.write(f"**Comments:** {reddit_stats.get('comment_count', 0)}")
-
-                    # Twitter stats
-                    twitter_stats = sources.get('twitter', {})
-                    if twitter_stats.get('has_data'):
-                        with col3:
-                            st.markdown("#### Twitter")
-                            st.write(f"**Tweets:** {twitter_stats.get('tweet_count', 0)}")
-                            st.write(f"**Total Likes:** {twitter_stats.get('total_likes', 0):,}")
-
-                # Alternative suggestions
-                if result.get('suggestions') and len(result['suggestions']) > 1:
-                    st.markdown("---")
-                    st.markdown("### 🔄 Related Searches")
-                    suggestions_str = " • ".join([f"**{s}**" for s in result['suggestions'][:5]])
-                    st.markdown(suggestions_str)
-
-                st.markdown('</div>', unsafe_allow_html=True)
-
-            else:
-                st.error(f"❌ Search failed: {response.status_code}")
-                st.info("💡 Falling back to RAG search...")
-                # Fallback to original RAG-based search
-                fallback_rag_search(product_name)
-
-        except requests.Timeout:
-            st.error("⏱️ Request timed out. Please try again.")
-        except Exception as e:
-            st.error(f"❌ Error: {str(e)}")
-            st.info("💡 Make sure the backend server is running at http://localhost:8000")
-
-
-def fallback_rag_search(product_name: str):
-    """Fallback to RAG-based search if smart search fails"""
-    try:
-        query = f"What is the review consensus about {product_name}?"
-        payload = {"query": query, "n_results": 10}
-
-        response = requests.post(
-            f"{API_BASE_URL}/rag/query",
-            json=payload,
-            timeout=120
-        )
-
-        if response.status_code == 200:
-            result = response.json()
-            st.markdown('<div class="result-box">', unsafe_allow_html=True)
-            st.markdown(f"## 📊 Review Consensus: {product_name}")
-            st.markdown("---")
-            st.markdown("### What People Are Saying:")
-            st.markdown(result['response'])
-
-            if result.get('sources') and len(result['sources']) > 0:
-                st.markdown("---")
-                st.markdown(f"### 📚 Based on {result['context_count']} Reviews")
-                for source in result['sources'][:3]:
-                    rating = source['metadata'].get('rating', 'N/A')
-                    source_name = source['metadata'].get('source', 'Unknown')
-                    with st.expander(f"⭐ {rating}/5.0 - {source_name}"):
-                        st.write(source['text'])
-
-            st.markdown('</div>', unsafe_allow_html=True)
-    except Exception as e:
-        st.error(f"RAG search also failed: {str(e)}")
-
-
-def identify_and_get_reviews(image: Image.Image):
-    """Identify product from image and get reviews using Complete Pipeline (CLIP + OCR + Gemini)"""
-    with st.spinner("🔍 Analyzing image (AI Vision + Text Recognition)..."):
-        try:
-            # Prepare image
-            img_byte_arr = io.BytesIO()
-            image.save(img_byte_arr, format='PNG')
-            img_byte_arr.seek(0)
-
-            files = {"image": ("image.png", img_byte_arr, "image/png")}
-
-            response = requests.post(
-                f"{API_BASE_URL}/recognition/",
-                files=files,
-                timeout=60  # Increased timeout for complete pipeline
-            )
-
-            if response.status_code == 200:
-                result = response.json()
-
-                # Check if recognition was successful
-                if result.get('success'):
-                    primary_match = result.get('primary_match', {})
-                    product_label = primary_match.get('product_name', 'unknown product')
-                    confidence = primary_match.get('confidence', 0)
-                    category = primary_match.get('category', 'unknown')
-                    message = result.get('message', '')
-
-                    # Display result with enhanced UI
-                    col1, col2 = st.columns([3, 1])
-
-                    with col1:
-                        # Determine confidence emoji
-                        if confidence >= 0.8:
-                            emoji = "✅"
-                            conf_color = "green"
-                        elif confidence >= 0.6:
-                            emoji = "🟡"
-                            conf_color = "orange"
-                        else:
-                            emoji = "⚠️"
-                            conf_color = "red"
-
-                        st.markdown(f"### {emoji} **{product_label.title()}**")
-                        st.markdown(f"**Category:** {category.capitalize()}")
-
-                    with col2:
-                        # Confidence meter
-                        st.metric("Confidence", f"{confidence*100:.0f}%")
-
-                    # Show method and details
-                    if "multimodal" in message.lower():
-                        st.info("💡 " + message)
-                    elif "generic category" in message.lower():
-                        st.warning("⚠️ " + message)
-                    elif message:
-                        st.info(message)
-
-                    # Show alternative matches if available
-                    alternatives = result.get('alternative_matches', [])
-                    if alternatives:
-                        with st.expander("View alternative matches"):
-                            for alt in alternatives[:3]:
-                                st.write(f"• {alt['product_name']}: {alt['confidence']*100:.1f}%")
-
-                    # Automatically get reviews for this product (same as text input)
-                    product_name = product_label
-                    st.markdown("---")
-                    st.info(f"🔍 Fetching reviews for **{product_name.title()}**...")
-                    get_review_consensus(product_name)
+                    st.success(f"Product identified: {result.get('product_name', 'Unknown')}")
+                    display_product_results(result)
                 else:
-                    # Recognition failed
-                    error_message = result.get('message', 'Recognition failed')
-                    st.error(f"❌ {error_message}")
-
-                    # Show helpful tips
-                    with st.expander("💡 Tips for better recognition"):
-                        st.markdown("""
-                        - Ensure good lighting
-                        - Capture product label clearly
-                        - Avoid blurry images
-                        - For products without text (shoes, electronics), upload images showing logos/distinctive features
-                        """)
-            else:
-                st.error(f"❌ Recognition failed: {response.status_code}")
-
-        except requests.exceptions.Timeout:
-            st.error("⏱️ Recognition timed out. Please try again with a clearer image.")
-        except Exception as e:
-            st.error(f"❌ Error: {str(e)}")
+                    status.empty()
+    else:
+        st.info("Please upload a product image to begin analysis.")
 
 
-def show_modern_chatbot():
-    """Display modern production-style chatbot interface"""
-    st.markdown("---")
-    st.markdown('<div class="result-box" style="padding: 0;">', unsafe_allow_html=True)
+# =============================================================================
+# FLOATING CHATBOT
+# =============================================================================
 
-    # Header with close button
-    col1, col2 = st.columns([5, 1])
-    with col1:
-        st.markdown("## 💬 AI Product Assistant")
-    with col2:
-        if st.button("✕", key="close_chat", help="Close chat"):
-            st.session_state.show_chatbot = False
-            st.rerun()
 
+def render_chatbot_button():
+    """Render beautiful chatbot card button in bottom-right corner"""
+
+    # Wrapper div with unique ID for specific CSS targeting
+    st.markdown('<div id="chatbot-button-wrapper">', unsafe_allow_html=True)
+
+    # Functional button with new text
+    if st.button("💬 Want to know more about any product? Ask our AI Assistant!", key="chatbot_toggle_btn", help="Chat with AI Assistant"):
+        st.session_state.chatbot_open = True
+        st.rerun()
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Beautiful chatbot-specific CSS (doesn't affect search button)
+    st.markdown(
+        """
+        <style>
+        /* Target ONLY the chatbot button using wrapper ID */
+        #chatbot-button-wrapper button {
+            position: fixed !important;
+            bottom: 30px !important;
+            right: 30px !important;
+            z-index: 998 !important;
+
+            /* Beautiful card styling */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            border: none !important;
+            padding: 16px 24px !important;
+            border-radius: 50px !important;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6) !important;
+
+            /* Text styling */
+            font-size: 0.95rem !important;
+            font-weight: 600 !important;
+            white-space: nowrap !important;
+
+            /* Animation */
+            animation: chatBounce 2s ease-in-out infinite !important;
+            transition: all 0.3s ease !important;
+        }
+
+        /* Bounce animation */
+        @keyframes chatBounce {
+            0%, 100% {
+                transform: translateY(0);
+                box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6);
+            }
+            50% {
+                transform: translateY(-8px);
+                box-shadow: 0 12px 32px rgba(102, 126, 234, 0.8);
+            }
+        }
+
+        /* Hover effect - scale up and stop bounce */
+        #chatbot-button-wrapper button:hover {
+            transform: scale(1.1) translateY(-5px) !important;
+            box-shadow: 0 12px 36px rgba(102, 126, 234, 0.9) !important;
+            animation: none !important;
+        }
+
+        /* Responsive - Mobile */
+        @media (max-width: 768px) {
+            #chatbot-button-wrapper button {
+                bottom: 20px !important;
+                right: 20px !important;
+                padding: 14px 20px !important;
+                font-size: 0.85rem !important;
+            }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_chatbot_fullscreen():
+    """Render full-screen chatbot interface (completely replaces main content)"""
     # Initialize chat history
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Welcome message with suggested prompts if no messages
-    if not st.session_state.messages:
-        st.markdown("""
-        <div style="text-align: center; padding: 30px 20px;">
-            <h3 style="color: #667eea; margin-bottom: 10px;">👋 Hi! How can I help you today?</h3>
-            <p style="color: #666; margin-bottom: 20px;">I can help you understand products, compare features, and analyze reviews</p>
-        </div>
-        """, unsafe_allow_html=True)
+    # Custom styling for chatbot-only view
+    st.markdown(
+        """
+        <style>
+        /* Full-screen chatbot styling */
+        .chatbot-header-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px 32px;
+            color: white;
+            margin: 0 -1rem 1rem -1rem;
+            border-radius: 0;
+            position: relative;
+        }
 
-    # Display chat history
-    if st.session_state.messages:
+        .chatbot-header-bar h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .chatbot-header-bar p {
+            margin: 6px 0 0 0;
+            font-size: 0.9rem;
+            opacity: 0.95;
+            font-style: italic;
+        }
+
+        /* Close button styling - in same row as header */
+        .stButton > button[kind="secondary"] {
+            background: rgba(255, 255, 255, 0.2) !important;
+            color: white !important;
+            border: none !important;
+            font-size: 24px !important;
+            padding: 8px 12px !important;
+            border-radius: 6px !important;
+            transition: all 0.2s !important;
+        }
+
+        .stButton > button[kind="secondary"]:hover {
+            background: rgba(255, 255, 255, 0.3) !important;
+            transform: rotate(90deg) !important;
+        }
+
+        /* Welcome screen styling - Minimal to fit screen */
+        .welcome-container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .welcome-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .welcome-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .welcome-text {
+            font-size: 0.95rem;
+            color: #6b7280;
+            line-height: 1.4;
+            margin-bottom: 16px;
+        }
+
+        /* Chat container */
+        .chat-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 10px 20px;
+        }
+
+        /* Responsive Design - Mobile & Tablet */
+        @media (max-width: 768px) {
+            .chatbot-header-bar {
+                padding: 12px 20px;
+                margin: 0 -1rem 0.5rem -1rem;
+            }
+
+            .chatbot-header-bar h1 {
+                font-size: 1.2rem;
+            }
+
+            .chatbot-header-bar p {
+                font-size: 0.8rem;
+                margin: 4px 0 0 0;
+            }
+
+            .welcome-container {
+                padding: 5px;
+            }
+
+            .welcome-icon {
+                font-size: 40px;
+                margin-bottom: 8px;
+            }
+
+            .welcome-title {
+                font-size: 1.2rem;
+                margin-bottom: 6px;
+            }
+
+            .welcome-text {
+                font-size: 0.85rem;
+                line-height: 1.3;
+                margin-bottom: 10px;
+            }
+
+            .chat-container {
+                padding: 5px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .chatbot-header-bar {
+                padding: 10px 15px;
+            }
+
+            .chatbot-header-bar h1 {
+                font-size: 1.1rem;
+            }
+
+            .chatbot-header-bar p {
+                font-size: 0.75rem;
+            }
+
+            .welcome-icon {
+                font-size: 36px;
+                margin-bottom: 6px;
+            }
+
+            .welcome-title {
+                font-size: 1.1rem;
+            }
+
+            .welcome-text {
+                font-size: 0.8rem;
+                margin-bottom: 8px;
+            }
+        }
+
+        /* Adjust Streamlit's default spacing for chatbot view */
+        .block-container {
+            padding-top: 1rem !important;
+            padding-bottom: 3rem !important;
+            max-height: 100vh !important;
+            overflow-y: auto !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Header with close button - fixed together
+    col_header, col_close = st.columns([11, 1])
+
+    with col_header:
+        st.markdown(
+            """
+            <div class="chatbot-header-bar">
+                <h1>AI Product Assistant</h1>
+                <p>"Any doubt with product or help to identify best product for you based on reviews"</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with col_close:
+        st.markdown("<div style='margin-top: 12px;'>", unsafe_allow_html=True)
+        if st.button("✕", key="close_chatbot", help="Close and return to Product Search", type="secondary"):
+            st.session_state.chatbot_open = False
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    # Main chat area
+    st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
+
+    # Welcome screen (if no messages) - Compact, no scrolling needed
+    if not st.session_state.messages:
+        # Minimal spacing to fit everything on screen
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        st.markdown(
+            """
+            <div class="welcome-container">
+                <div class="welcome-icon">🤖</div>
+                <div class="welcome-title">How can I help you today?</div>
+                <div class="welcome-text">
+                    Ask me anything about products, comparisons, features, or get
+                    personalized recommendations based on thousands of reviews.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    # Display chat messages
+    else:
+        # Back button at top of chat
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            if st.button("← Back to Search", key="back_to_search"):
+                st.session_state.chatbot_open = False
+                st.rerun()
+
+        st.markdown("---")
+
+        # Chat messages
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-                # Show sources if available
+                # Show sources
                 if message["role"] == "assistant" and "sources" in message:
-                    with st.expander("📚 View Sources", expanded=False):
+                    with st.expander("📚 View Sources"):
                         for idx, source in enumerate(message["sources"][:3], 1):
-                            metadata = source.get('metadata', {})
-                            st.markdown(f"""
-                            **Source {idx}:** {metadata.get('source', 'Unknown')}
-                            **Rating:** ⭐ {metadata.get('rating', 'N/A')}/5
-                            **Content:** {source.get('text', '')[:200]}...
-                            """)
+                            metadata = source.get("metadata", {})
+                            st.markdown(
+                                f"""
+**Source {idx}:** {metadata.get('source', 'Unknown')}
+**Rating:** {metadata.get('rating', 'N/A')}/5
+**Excerpt:** {source.get('text', '')[:150]}...
+                            """
+                            )
 
-    # Chat input
-    if prompt := st.chat_input("Ask me anything about products...", key="chat_input_main"):
-        # Add user message
-        st.session_state.messages.append({"role": "user", "content": prompt})
-
-        # Display user message immediately
-        with st.chat_message("user"):
-            st.markdown(prompt)
-
-        # Get AI response
-        with st.chat_message("assistant"):
-            with st.spinner("🤔 Searching through reviews and analyzing..."):
-                try:
-                    payload = {
-                        "query": prompt,
-                        "n_results": 5
-                    }
-
-                    response = requests.post(
-                        f"{API_BASE_URL}/rag/query",
-                        json=payload,
-                        timeout=120
-                    )
-
-                    if response.status_code == 200:
-                        result = response.json()
-                        ai_response = result['response']
-
-                        st.markdown(ai_response)
-
-                        # Store message with sources
-                        message_data = {
-                            "role": "assistant",
-                            "content": ai_response
-                        }
-                        if result.get('sources'):
-                            message_data["sources"] = result['sources']
-
-                        st.session_state.messages.append(message_data)
-
-                        # Show context info
-                        if result.get('context_count', 0) > 0:
-                            st.caption(f"✅ Answer based on {result['context_count']} real-time reviews")
-
-                        # Show sources inline
-                        if result.get('sources'):
-                            with st.expander("📚 View Sources", expanded=False):
-                                for idx, source in enumerate(result['sources'][:3], 1):
-                                    metadata = source.get('metadata', {})
-                                    st.markdown(f"""
-                                    **Source {idx}:** {metadata.get('source', 'Unknown')}
-                                    **Rating:** ⭐ {metadata.get('rating', 'N/A')}/5
-                                    **Content:** {source.get('text', '')[:200]}...
-                                    """)
-                    else:
-                        error_msg = "I apologize, but I couldn't process that request. Please try rephrasing your question or ask about a specific product."
-                        st.markdown(error_msg)
-                        st.session_state.messages.append({"role": "assistant", "content": error_msg})
-
-                except Exception as e:
-                    error_msg = f"Connection error: {str(e)}. Please try again."
-                    st.markdown(error_msg)
-                    st.session_state.messages.append({"role": "assistant", "content": error_msg})
-
-    # Chat actions
-    if st.session_state.messages:
-        col1, col2, col3 = st.columns([1, 1, 1])
-        with col2:
-            if st.button("🗑️ Clear Chat", use_container_width=True):
+        # Action buttons
+        col1, col2, _ = st.columns([1, 1, 3])
+        with col1:
+            if st.button("🗑️ Clear Chat", key="clear_chat_history"):
                 st.session_state.messages = []
                 st.rerun()
+        with col2:
+            if st.button("🏠 Back Home", key="back_home"):
+                st.session_state.chatbot_open = False
+                st.rerun()
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
+def handle_chat_input():
+    """Handle chat input at root level (outside any containers)"""
+    # Chat input (MUST be at root level)
+    if st.session_state.chatbot_open:
+        prompt = st.chat_input(
+            "Ask me anything about products...",
+            key="chat_input_main",
+        )
+
+        if prompt:
+            st.session_state.messages.append({"role": "user", "content": prompt})
+
+            with st.spinner("Generating response..."):
+                response_data = query_rag_chatbot(prompt)
+
+                if response_data:
+                    ai_response = response_data.get(
+                        "response", "Unable to process request."
+                    )
+                    message_data = {"role": "assistant", "content": ai_response}
+
+                    if response_data.get("sources"):
+                        message_data["sources"] = response_data["sources"]
+
+                    st.session_state.messages.append(message_data)
+                else:
+                    error_msg = "Error processing request. Please try again."
+                    st.session_state.messages.append(
+                        {"role": "assistant", "content": error_msg}
+                    )
+
+            st.rerun()
+
+
+# =============================================================================
+# API FUNCTIONS
+# =============================================================================
+
+
+def get_review_consensus(product_name: str) -> Optional[Dict[str, Any]]:
+    """Get product review consensus from API"""
+    try:
+        response = requests.get(
+            f"{API_BASE_URL}/smart-search/",
+            params={"q": product_name, "use_cache": True, "include_ml": True},
+            timeout=45,
+        )
+
+        if response.status_code == 200:
+            return response.json()
+        elif response.status_code == 404:
+            st.error("Product not found. Please try a different search term.")
+        elif response.status_code == 500:
+            st.error("Server error. Please try again later.")
+        else:
+            st.error(f"Request failed (Status: {response.status_code})")
+        return None
+
+    except requests.Timeout:
+        st.error(
+            """
+**Request Timeout**
+
+This usually happens when:
+- Product has many reviews (processing takes longer)
+- Backend server is slow to respond
+
+**What to try:**
+- Search for a more specific product name
+- Try again in a few moments
+- Check if backend server is running
+        """
+        )
+        return None
+    except requests.ConnectionError:
+        st.error(
+            """
+**Connection Error**
+
+Cannot connect to backend server.
+
+**Please ensure:**
+- Backend is running at http://localhost:8000
+- No firewall blocking the connection
+
+**Start backend:** `uvicorn app.main:app --reload`
+        """
+        )
+        return None
+    except Exception as e:
+        st.error(f"Unexpected error: {str(e)}")
+        return None
+
+
+def identify_and_get_reviews(image: Image.Image) -> Optional[Dict[str, Any]]:
+    """Identify product from image"""
+    try:
+        # Prepare image
+        img_byte_arr = io.BytesIO()
+        image.save(img_byte_arr, format="PNG")
+        img_byte_arr.seek(0)
+
+        files = {"image": ("image.png", img_byte_arr, "image/png")}
+
+        response = requests.post(f"{API_BASE_URL}/recognition/", files=files, timeout=60)
+
+        if response.status_code == 200:
+            result = response.json()
+
+            if result.get("success"):
+                primary_match = result.get("primary_match", {})
+                product_name = primary_match.get("product_name", "unknown")
+                confidence = primary_match.get("confidence", "medium")
+
+                # Show info message if confidence is low (only category detected)
+                if confidence == "low":
+                    st.info(f"ℹ️ Could not identify exact product name. Showing results for category: **{product_name}**. For exact product identification, please upload an image of the product along with its package.")
+
+                # Get reviews
+                review_data = get_review_consensus(product_name)
+
+                if review_data:
+                    review_data["recognition"] = result
+                    review_data["product_name"] = product_name
+                    return review_data
+                else:
+                    return {"product_name": product_name, "recognition": result}
+            else:
+                st.error(result.get("message", "Unable to identify product from image."))
+                st.info(
+                    """
+**Tips for better recognition:**
+- Ensure good lighting
+- Capture product label clearly
+- Avoid blurry images
+- Show brand name if visible
+                """
+                )
+                return None
+        else:
+            st.error(f"Recognition failed (Status: {response.status_code})")
+            return None
+
+    except requests.Timeout:
+        st.error(
+            """
+**Image Processing Timeout**
+
+Image recognition is taking longer than expected (>60 seconds).
+
+**What to try:**
+- Use a clearer, higher quality image
+- Try a different product image
+- Check backend server load
+        """
+        )
+        return None
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
+        return None
+
+
+def query_rag_chatbot(query: str) -> Optional[Dict[str, Any]]:
+    """Query RAG chatbot"""
+    try:
+        payload = {"query": query, "n_results": 5}
+        response = requests.post(f"{API_BASE_URL}/rag/query", json=payload, timeout=90)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+
+    except requests.Timeout:
+        st.error(
+            """
+**Response Timeout**
+
+AI is taking longer than expected to generate a response.
+
+**What to try:**
+- Ask a more specific question
+- Try a different product
+- Wait a moment and try again
+        """
+        )
+        return None
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
+        return None
+
+
+# =============================================================================
+# DISPLAY FUNCTIONS
+# =============================================================================
+
+
+def display_product_results(result: Dict[str, Any]):
+    """Display product results professionally"""
+
+    product = result.get("product", {})
+    product_name = product.get("name", result.get("product_name", "Unknown Product"))
+
+    st.markdown(f"## {product_name}")
+
+    # Typo correction notice
+    if result.get("suggestions"):
+        original_query = result.get("original_query", "")
+        if original_query and original_query.lower() != product_name.lower():
+            st.info(f"Showing results for: **{product_name}** (auto-corrected)")
+
+    # Product images
+    if product.get("images"):
+        cols = st.columns(min(len(product["images"]), 4))
+        for idx, img in enumerate(product["images"][:4]):
+            with cols[idx]:
+                st.image(img.get("url"), use_column_width=True)
+
+    st.divider()
+
+    # Key metrics (removed "Status", kept only important ones)
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        rating = product.get("overall_rating", 0)
+        st.metric("Average Rating", f"{rating:.1f}/5.0")
+
+    with col2:
+        review_count = product.get("total_reviews", 0)
+        st.metric("Total Reviews", f"{review_count:,}")
+
+    with col3:
+        recommendation = product.get("recommendation", {})
+        rec_badge = recommendation.get("badge", "N/A")
+        st.metric("Recommendation", rec_badge)
+
+    # Recommendation details
+    if recommendation:
+        decision = recommendation.get("decision")
+        confidence = recommendation.get("confidence", 0)
+        reason = recommendation.get("reason", "")
+
+        if decision == "buy":
+            st.success(f"**{rec_badge}** (Confidence: {confidence:.0f}%)\n\n{reason}")
+        elif decision == "consider":
+            st.info(f"**{rec_badge}** (Confidence: {confidence:.0f}%)\n\n{reason}")
+        elif decision == "wait":
+            st.warning(f"**{rec_badge}** (Confidence: {confidence:.0f}%)\n\n{reason}")
+        elif decision == "skip":
+            st.error(f"**{rec_badge}** (Confidence: {confidence:.0f}%)\n\n{reason}")
+
+    # Review Consensus
+    consensus = result.get("consensus", {})
+    if consensus and consensus.get("summary"):
+        st.divider()
+        st.subheader("Review Analysis")
+
+        if consensus.get("summary"):
+            st.markdown("**Summary**")
+            st.info(consensus["summary"])
+
+        # Sentiment
+        sentiment = consensus.get("sentiment", {})
+        if sentiment:
+            st.markdown("**Sentiment Distribution**")
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                st.metric("Positive", f"{sentiment.get('positive_percent', 0):.0f}%")
+            with col2:
+                st.metric("Neutral", f"{sentiment.get('neutral_percent', 0):.0f}%")
+            with col3:
+                st.metric("Negative", f"{sentiment.get('negative_percent', 0):.0f}%")
+
+        # Pros and Cons
+        if consensus.get("pros") or consensus.get("cons"):
+            st.divider()
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.markdown("**Strengths**")
+                if consensus.get("pros"):
+                    for pro in consensus["pros"]:
+                        st.markdown(f"- {pro}")
+                else:
+                    st.write("_No specific strengths extracted_")
+
+            with col2:
+                st.markdown("**Weaknesses**")
+                if consensus.get("cons"):
+                    for con in consensus["cons"]:
+                        st.markdown(f"- {con}")
+                else:
+                    st.write("_No specific weaknesses extracted_")
+
+    # Source Statistics
+    sources = result.get("sources", {})
+    if sources:
+        st.divider()
+        st.subheader("Data Sources")
+
+        col1, col2, col3 = st.columns(3)
+
+        youtube_stats = sources.get("youtube", {})
+        if youtube_stats.get("has_data"):
+            with col1:
+                st.markdown("**YouTube**")
+                st.write(f"Videos: {youtube_stats.get('video_count', 0)}")
+                st.write(f"Total Views: {youtube_stats.get('total_views', 0):,}")
+
+        reddit_stats = sources.get("reddit", {})
+        if reddit_stats.get("has_data"):
+            with col2:
+                st.markdown("**Reddit**")
+                st.write(f"Posts: {reddit_stats.get('post_count', 0)}")
+                st.write(f"Comments: {reddit_stats.get('comment_count', 0)}")
+
+        twitter_stats = sources.get("twitter", {})
+        if twitter_stats.get("has_data"):
+            with col3:
+                st.markdown("**Twitter**")
+                st.write(f"Tweets: {twitter_stats.get('tweet_count', 0)}")
+                st.write(f"Likes: {twitter_stats.get('total_likes', 0):,}")
+
+
+# =============================================================================
+# MAIN APPLICATION
+# =============================================================================
+
+
+def main():
+    """Main application"""
+
+    # Initialize chatbot state
+    if "chatbot_open" not in st.session_state:
+        st.session_state.chatbot_open = False
+
+    # IF CHATBOT IS OPEN: Show ONLY chatbot interface (full screen)
+    if st.session_state.chatbot_open:
+        render_chatbot_fullscreen()
+        handle_chat_input()
+        return  # Don't render anything else
+
+    # ELSE: Show normal product search/image interface
+    render_sidebar()
+    render_header()
+
+    # Main tabs (removed AI Assistant tab)
+    tab1, tab2 = st.tabs(["Product Search", "Upload Image Search"])
+
+    with tab1:
+        render_product_search_tab()
+
+    with tab2:
+        render_image_recognition_tab()
+
+    # Floating chatbot button (always visible)
+    render_chatbot_button()
 
 
 if __name__ == "__main__":
