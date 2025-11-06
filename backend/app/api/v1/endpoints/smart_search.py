@@ -63,11 +63,11 @@ async def smart_search(
     **Smart Product Search - Works with ANY product!**
 
     **Features:**
-    - ✅ Typo tolerance ("iphne 15" → "iphone 15")
-    - ✅ Spelling corrections ("samsng galxy" → "samsung galaxy")
-    - ✅ On-demand scraping (no storage needed)
-    - ✅ Real-time ML analysis
-    - ✅ Smart caching (24h TTL)
+    - Typo tolerance ("iphne 15" → "iphone 15")
+    - Spelling corrections ("samsng galxy" → "samsung galaxy")
+    - On-demand scraping (no storage needed)
+    - Real-time ML analysis
+    - Smart caching (24h TTL)
 
     **Examples:**
     - `q=iphone 15` → Returns iPhone 15 reviews

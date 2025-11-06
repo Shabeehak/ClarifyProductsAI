@@ -249,7 +249,7 @@ class TestImageQualityIntegration:
     def test_with_real_test_image(self):
         """Test with actual test image if available"""
         # Look for test images in tests/data directory
-        test_image_path = Path(__file__).parent.parent / "data" / "test_images" / "sample_image.jpg"
+        test_image_path = Path(__file__).parent.parent.parent / "tests" / "data" / "test_images" / "sample_image.jpg"
 
         if test_image_path.exists():
             checker = get_quality_checker()

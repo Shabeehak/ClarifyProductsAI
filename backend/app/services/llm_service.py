@@ -77,7 +77,7 @@ class LLMService:
                 system_prompt=system_prompt,
             )
             if response:
-                logger.info(f"✅ Generated with {self.primary_provider}")
+                logger.info(f"Generated with {self.primary_provider}")
                 return response
         except Exception as e:
             logger.warning(f"Primary provider {self.primary_provider} failed: {e}")
@@ -94,7 +94,7 @@ class LLMService:
                     system_prompt=system_prompt,
                 )
                 if response:
-                    logger.info(f"✅ Generated with fallback {fallback}")
+                    logger.info(f"Generated with fallback {fallback}")
                     return response
             except Exception as e:
                 logger.warning(f"Fallback {fallback} failed: {e}")

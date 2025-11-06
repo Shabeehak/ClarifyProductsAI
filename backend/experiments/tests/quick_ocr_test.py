@@ -46,9 +46,10 @@ def test_paddle():
         ocr = PaddleOCR(use_textline_orientation=True, lang='en')
         logger.info("PaddleOCR model initialized")
 
-        # Use sample_image.jpg
-        logger.info("Running PaddleOCR on sample_image.jpg")
-        result = ocr.predict("sample_image.jpg")
+        # Use sample_image.jpg from tests/data/test_images
+        image_path = Path(__file__).parent.parent.parent / "tests" / "data" / "test_images" / "sample_image.jpg"
+        logger.info(f"Running PaddleOCR on {image_path}")
+        result = ocr.predict(str(image_path))
 
         if result and len(result) > 0:
             # PaddleOCR 3.3.0+ returns dict with 'rec_texts' and 'rec_scores'
@@ -91,8 +92,9 @@ def test_easy():
         import easyocr
         reader = easyocr.Reader(['en'], gpu=False, verbose=False)
 
-        # Use sample_image.jpg
-        result = reader.readtext("sample_image.jpg")
+        # Use sample_image.jpg from tests/data/test_images
+        image_path = Path(__file__).parent.parent.parent / "tests" / "data" / "test_images" / "sample_image.jpg"
+        result = reader.readtext(str(image_path))
 
         if result:
             print("SUCCESS: EasyOCR is working!")
@@ -116,13 +118,13 @@ def main():
     print("="*60)
 
     # Check if sample_image.jpg exists
-    if not os.path.exists("sample_image.jpg"):
-        print("\nERROR: sample_image.jpg not found!")
-        print("Please run this from backend/tests directory")
-        print("Or place sample_image.jpg in current directory")
+    image_path = Path(__file__).parent.parent.parent / "tests" / "data" / "test_images" / "sample_image.jpg"
+    if not image_path.exists():
+        print(f"\nERROR: sample_image.jpg not found at {image_path}!")
+        print("Please ensure the test image exists in tests/data/test_images/")
         return
 
-    print("\nFound: sample_image.jpg")
+    print(f"\nFound: {image_path}")
 
     # Test both
     paddle_ok = test_paddle()

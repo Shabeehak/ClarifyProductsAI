@@ -1,0 +1,25 @@
+{
+  "experiment_id": "sentiment_distilbert_vs_roberta",
+  "model_name": "sentiment_analyzer",
+  "variants": [
+    {
+      "variant_id": "champion",
+      "model_name": "sentiment_analyzer",
+      "model_version": "distilbert-base-uncased-finetuned-sst-2-english",
+      "traffic_percentage": 0.8,
+      "description": "Current DistilBERT model (fast, 91% accuracy)"
+    },
+    {
+      "variant_id": "challenger",
+      "model_name": "sentiment_analyzer",
+      "model_version": "roberta-base-go_emotions",
+      "traffic_percentage": 0.2,
+      "description": "RoBERTa model (slower, potentially more accurate)"
+    }
+  ],
+  "start_date": "2025-10-30T15:58:20.187134",
+  "end_date": "2025-11-13T15:58:20.187134",
+  "status": "active",
+  "min_sample_size": 1000,
+  "confidence_level": 0.95
+}

@@ -1,0 +1,165 @@
+name: ML Model Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/app/ml_models/**'
+      - 'backend/tests/ml_models/**'
+      - 'backend/app/mlops/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/app/ml_models/**'
+      - 'backend/tests/ml_models/**'
+      - 'backend/app/mlops/**'
+  schedule:
+    # Run daily at 2 AM UTC to catch model drift
+    - cron: '0 2 * * *'
+
+jobs:
+  test-ml-models:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r backend/requirements.txt
+        pip install pytest pytest-cov mlflow
+
+    - name: Cache ML models
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/huggingface
+          backend/models/
+        key: ml-models-${{ hashFiles('backend/requirements.txt') }}
+        restore-keys: |
+          ml-models-
+
+    - name: Test CLIP Model
+      run: |
+        cd backend
+        pytest tests/ml_models/test_clip_recognizer.py -v -s
+
+    - name: Test Sentiment Analyzer
+      run: |
+        cd backend
+        pytest tests/ml_models/test_sentiment_analyzer.py -v -s
+
+    - name: Test Summarizer
+      run: |
+        cd backend
+        pytest tests/ml_models/test_summarizer.py -v -s
+
+    - name: Run ML Model Performance Tests
+      run: |
+        cd backend
+        pytest tests/ml_models/ -v --durations=10
+
+    - name: Generate Model Performance Report
+      run: |
+        cd backend
+        python -m pytest tests/ml_models/ --json-report --json-report-file=ml-report.json
+
+    - name: Upload ML Test Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ml-test-report
+        path: backend/ml-report.json
+
+  benchmark-models:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[benchmark]')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r backend/requirements.txt
+        pip install pytest-benchmark mlflow
+
+    - name: Cache ML models
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/huggingface
+          backend/models/
+        key: ml-models-${{ hashFiles('backend/requirements.txt') }}
+
+    - name: Run Model Benchmarks
+      run: |
+        cd backend
+        pytest tests/ml_models/test_model_benchmarks.py -v --benchmark-only
+
+    - name: Log Benchmarks to MLflow
+      env:
+        MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+      run: |
+        cd backend
+        python scripts/log_benchmarks_to_mlflow.py
+
+    - name: Check for Performance Regression
+      run: |
+        cd backend
+        python scripts/check_performance_regression.py
+
+  model-quality-gate:
+    runs-on: ubuntu-latest
+    needs: test-ml-models
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Download ML Test Report
+      uses: actions/download-artifact@v4
+      with:
+        name: ml-test-report
+        path: backend/
+
+    - name: Check Model Quality Gates
+      run: |
+        cd backend
+        python -c "
+        import json
+
+        with open('ml-report.json') as f:
+            report = json.load(f)
+
+        # Quality gates
+        min_accuracy = 0.85
+        max_inference_time_ms = 500
+
+        # Check if all tests passed
+        if report.get('summary', {}).get('failed', 1) > 0:
+            print('FAIL: Some ML tests failed')
+            exit(1)
+
+        print('PASS: All ML tests passed')
+        "

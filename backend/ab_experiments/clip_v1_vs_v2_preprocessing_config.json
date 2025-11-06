@@ -1,0 +1,25 @@
+{
+  "experiment_id": "clip_v1_vs_v2_preprocessing",
+  "model_name": "clip_product_recognizer",
+  "variants": [
+    {
+      "variant_id": "champion",
+      "model_name": "clip_product_recognizer",
+      "model_version": "v1.0_baseline",
+      "traffic_percentage": 0.9,
+      "description": "Current production model (CLIP ViT-B/32)"
+    },
+    {
+      "variant_id": "challenger",
+      "model_name": "clip_product_recognizer",
+      "model_version": "v2.0_with_preprocessing",
+      "traffic_percentage": 0.1,
+      "description": "New model with image preprocessing"
+    }
+  ],
+  "start_date": "2025-10-30T15:58:11.809581",
+  "end_date": "2025-11-06T15:58:11.809581",
+  "status": "active",
+  "min_sample_size": 500,
+  "confidence_level": 0.95
+}

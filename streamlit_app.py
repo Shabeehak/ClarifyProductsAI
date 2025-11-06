@@ -1013,7 +1013,7 @@ def identify_and_get_reviews(image: Image.Image) -> Optional[Dict[str, Any]]:
 
                 # Show info message if confidence is low (only category detected)
                 if confidence == "low":
-                    st.info(f"ℹ️ Could not identify exact product name. Showing results for category: **{product_name}**. For exact product identification, please upload an image of the product along with its package.")
+                    st.info(f"Could not identify exact product name. Showing results for category: **{product_name}**. For exact product identification, please upload an image of the product along with its package.")
 
                 # Get reviews
                 review_data = get_review_consensus(product_name)

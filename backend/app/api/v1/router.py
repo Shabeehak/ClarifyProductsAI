@@ -46,7 +46,7 @@ api_router.include_router(
 api_router.include_router(
     smart_search.router,
     prefix="/smart-search",
-    tags=["🚀 Smart Search (Scalable + Typo Tolerant)"],
+    tags=["Smart Search (Scalable + Typo Tolerant)"],
 )
 
 api_router.include_router(

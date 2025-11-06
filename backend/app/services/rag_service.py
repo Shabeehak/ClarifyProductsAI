@@ -341,7 +341,7 @@ Answer:"""
 
         # Create a comprehensive summary
         summary_parts.append(
-            f"📊 Based on {len(context)} relevant reviews:\n"
+            f"Based on {len(context)} relevant reviews:\n"
             f"• {positive} positive reviews ({positive/len(context)*100:.0f}%)\n"
             f"• {negative} negative reviews ({negative/len(context)*100:.0f}%)\n"
             f"• {neutral} neutral reviews ({neutral/len(context)*100:.0f}%)"
@@ -349,18 +349,18 @@ Answer:"""
 
         # Determine overall sentiment
         if positive > len(context) * 0.6:
-            summary_parts.append("\n✅ Overall: Mostly positive feedback")
+            summary_parts.append("\nOverall: Mostly positive feedback")
         elif negative > len(context) * 0.4:
-            summary_parts.append("\n⚠️ Overall: Mixed to negative feedback")
+            summary_parts.append("\nOverall: Mixed to negative feedback")
         else:
-            summary_parts.append("\n💭 Overall: Mixed opinions")
+            summary_parts.append("\nOverall: Mixed opinions")
 
         # Add top relevant review snippets
-        summary_parts.append("\n📝 Key points from reviews:")
+        summary_parts.append("\nKey points from reviews:")
         for i, item in enumerate(context[:3], 1):
             text = item["text"][:150]
             rating = item.get("metadata", {}).get("rating", "N/A")
-            summary_parts.append(f"\n{i}. (⭐ {rating}/5) {text}...")
+            summary_parts.append(f"\n{i}. ({rating}/5) {text}...")
 
         summary_parts.append(
             "\n\nNote: This is a basic summary as the AI service is temporarily unavailable. "

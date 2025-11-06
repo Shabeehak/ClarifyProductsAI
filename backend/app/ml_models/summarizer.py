@@ -1,27 +1,26 @@
 """
-Review Summarization using BART (FREE)
-Facebook's BART model from Hugging Face
+Review Summarization using BART + Gemini Fallback
+Facebook's BART model from Hugging Face (primary)
+Gemini API as fallback for reliability
 """
 
 from typing import List, Dict
 from transformers import pipeline
 from loguru import logger
-import requests
 
 from app.core.config import settings
 
 
 class ReviewSummarizer:
-    """AI-powered review summarization"""
+    """AI-powered review summarization using BART with Gemini fallback"""
 
     def __init__(self):
         """Initialize summarizer"""
         self.pipeline = None
-        self.use_ollama = False
-        logger.info("Review Summarizer initialized")
+        logger.info("Review Summarizer initialized (BART + Gemini fallback)")
 
     def load_model(self):
-        """Load summarization model"""
+        """Load BART summarization model"""
         if self.pipeline is None:
             import time
             from pathlib import Path
@@ -29,131 +28,74 @@ class ReviewSummarizer:
             try:
                 start_time = time.time()
 
-                # Try Ollama first if available
-                logger.info("Checking for Ollama availability...")
-                if self._check_ollama_available():
-                    logger.info("Ollama is available and running")
-                    logger.info(
-                        f"Using Ollama for summarization at {settings.OLLAMA_API_URL}"
+                logger.info(f"Loading BART model: {settings.SUMMARIZATION_MODEL_NAME}")
+
+                # Check cache
+                model_cache_path = Path(settings.MODEL_CACHE_DIR) / "summarization"
+                cache_size_mb = 0
+
+                if model_cache_path.exists():
+                    model_files = list(model_cache_path.glob("*.bin")) + list(
+                        model_cache_path.glob("*.safetensors")
                     )
-                    self.use_ollama = True
-
-                    total_time = time.time() - start_time
-
-                    logger.info("=" * 60)
-                    logger.info("Summarization Model Loading Summary:")
-                    logger.info(f"  Model: Ollama (LLaMA/Mistral)")
-                    logger.info(f"  API URL: {settings.OLLAMA_API_URL}")
-                    logger.info(f"  Setup time: {total_time:.2f}s")
-                    logger.info("=" * 60)
-                else:
-                    logger.info("Ollama not available, using Hugging Face BART model")
-                    logger.info(
-                        f"Loading BART model: {settings.SUMMARIZATION_MODEL_NAME}"
-                    )
-
-                    # Check cache
-                    model_cache_path = Path(settings.MODEL_CACHE_DIR) / "summarization"
-                    cache_size_mb = 0
-
-                    if model_cache_path.exists():
-                        model_files = list(model_cache_path.glob("*.bin")) + list(
-                            model_cache_path.glob("*.safetensors")
+                    if model_files:
+                        cache_size_mb = sum(
+                            f.stat().st_size for f in model_files
+                        ) / (1024 * 1024)
+                        logger.info(
+                            f"Model found in cache ({cache_size_mb:.1f} MB)"
                         )
-                        if model_files:
-                            cache_size_mb = sum(
-                                f.stat().st_size for f in model_files
-                            ) / (1024 * 1024)
-                            logger.info(
-                                f"Model found in cache ({cache_size_mb:.1f} MB)"
-                            )
-                        else:
-                            logger.info(
-                                "Model cache directory exists but no model files found"
-                            )
-                            logger.info(
-                                "Will download from Hugging Face (approximately 1.6 GB)"
-                            )
                     else:
                         logger.info(
-                            "Model not in cache, will download from Hugging Face"
+                            "Model cache directory exists but no model files found"
                         )
-                        logger.info("Expected download size: ~1.6 GB (BART-large-CNN)")
-
-                    logger.info("Loading BART summarization pipeline...")
-
-                    self.pipeline = pipeline(
-                        "summarization",
-                        model=settings.SUMMARIZATION_MODEL_NAME,
-                        device=-1,  # CPU
-                        model_kwargs={"cache_dir": model_cache_path},
+                        logger.info(
+                            "Will download from Hugging Face (approximately 1.6 GB)"
+                        )
+                else:
+                    logger.info(
+                        "Model not in cache, will download from Hugging Face"
                     )
+                    logger.info("Expected download size: ~1.6 GB (BART-large-CNN)")
 
-                    total_time = time.time() - start_time
+                logger.info("Loading BART summarization pipeline...")
 
-                    logger.info("=" * 60)
-                    logger.info("Summarization Model Loading Summary:")
-                    logger.info(f"  Model: {settings.SUMMARIZATION_MODEL_NAME}")
-                    logger.info(f"  Device: CPU")
-                    logger.info(f"  Cache location: {model_cache_path}")
-                    if cache_size_mb > 0:
-                        logger.info(f"  Cache size: {cache_size_mb:.1f} MB")
-                    logger.info(f"  Total load time: {total_time:.2f}s")
-                    logger.info("=" * 60)
+                self.pipeline = pipeline(
+                    "summarization",
+                    model=settings.SUMMARIZATION_MODEL_NAME,
+                    device=-1,  # CPU
+                    model_kwargs={"cache_dir": model_cache_path},
+                )
+
+                total_time = time.time() - start_time
+
+                logger.info("=" * 60)
+                logger.info("Summarization Model Loading Summary:")
+                logger.info(f"  Model: {settings.SUMMARIZATION_MODEL_NAME}")
+                logger.info(f"  Device: CPU")
+                logger.info(f"  Cache location: {model_cache_path}")
+                if cache_size_mb > 0:
+                    logger.info(f"  Cache size: {cache_size_mb:.1f} MB")
+                logger.info(f"  Total load time: {total_time:.2f}s")
+                logger.info("=" * 60)
 
             except Exception as e:
                 logger.error(f"Failed to load summarization model: {str(e)}")
                 logger.error(f"Model name: {settings.SUMMARIZATION_MODEL_NAME}")
+                logger.warning("Will use Gemini API as fallback for summarization")
                 from app.core.exceptions import MLModelLoadException
 
                 raise MLModelLoadException(
                     message=f"Failed to load summarization model: {str(e)}",
                     details={
                         "model": settings.SUMMARIZATION_MODEL_NAME,
-                        "use_ollama": self.use_ollama,
                         "error": str(e),
                     },
                 ) from e
 
-    def _check_ollama_available(self) -> bool:
-        """Check if Ollama is running"""
-        try:
-            response = requests.get(f"{settings.OLLAMA_API_URL}/api/tags", timeout=2)
-            return response.status_code == 200
-        except:
-            return False
-
-    def summarize_with_ollama(self, text: str, max_length: int = 150) -> str:
-        """Summarize using Ollama (LLaMA/Mistral)"""
-        try:
-            prompt = f"""Summarize the following product reviews in 2-3 concise sentences:
-
-{text}
-
-Summary:"""
-
-            response = requests.post(
-                f"{settings.OLLAMA_API_URL}/api/generate",
-                json={
-                    "model": "llama2",  # or "mistral"
-                    "prompt": prompt,
-                    "stream": False,
-                },
-                timeout=30,
-            )
-
-            if response.status_code == 200:
-                return response.json().get("response", "").strip()
-            else:
-                raise Exception(f"Ollama API error: {response.status_code}")
-
-        except Exception as e:
-            logger.error(f"Ollama summarization failed: {str(e)}")
-            raise
-
     def summarize(self, text: str, max_length: int = 150, min_length: int = 50) -> str:
         """
-        Summarize review text
+        Summarize review text using BART (with Gemini fallback)
 
         Args:
             text: Text to summarize
@@ -163,24 +105,20 @@ Summary:"""
         Returns:
             Summarized text
         """
-        if self.pipeline is None and not self.use_ollama:
-            self.load_model()
+        # Try to load BART model if not already loaded
+        if self.pipeline is None:
+            try:
+                self.load_model()
+            except Exception as load_error:
+                logger.warning(f"BART model unavailable, using Gemini fallback: {load_error}")
+                return self._gemini_summary(text, max_length)
 
         try:
             import time
 
             start_time = time.time()
 
-            # Use Ollama if available
-            if self.use_ollama:
-                summary = self.summarize_with_ollama(text, max_length)
-                inference_time = time.time() - start_time
-                logger.debug(
-                    f"Summarization (Ollama) completed in {inference_time*1000:.1f}ms"
-                )
-                return summary
-
-            # Otherwise use BART
+            # Use BART for summarization
             # Clean and prepare text
             text = text.strip()
 
@@ -225,23 +163,61 @@ Summary:"""
             return summary
 
         except Exception as e:
-            logger.error(f"Error during summarization: {str(e)}")
-            logger.warning("Falling back to extractive summary")
+            logger.error(f"BART summarization failed: {str(e)}")
+            logger.info("Trying Gemini API fallback...")
             try:
-                # Better fallback: extract key sentences
-                return self._extractive_summary(text, max_length)
-            except Exception as fallback_error:
-                from app.core.exceptions import MLModelInferenceException
+                return self._gemini_summary(text, max_length)
+            except Exception as gemini_error:
+                logger.warning(f"Gemini fallback also failed: {gemini_error}")
+                logger.info("Using extractive summary as last resort")
+                try:
+                    return self._extractive_summary(text, max_length)
+                except Exception as extractive_error:
+                    from app.core.exceptions import MLModelInferenceException
 
-                raise MLModelInferenceException(
-                    message=f"Summarization failed (including fallback): {str(e)}",
-                    details={
-                        "model": "Ollama" if self.use_ollama else "BART",
-                        "text_length": len(text) if text else 0,
-                        "primary_error": str(e),
-                        "fallback_error": str(fallback_error),
-                    },
-                ) from e
+                    raise MLModelInferenceException(
+                        message=f"All summarization methods failed",
+                        details={
+                            "model": "BART",
+                            "text_length": len(text) if text else 0,
+                            "bart_error": str(e),
+                            "gemini_error": str(gemini_error),
+                            "extractive_error": str(extractive_error),
+                        },
+                    ) from e
+
+    def _gemini_summary(self, text: str, max_length: int = 150) -> str:
+        """Summarize using Gemini API as fallback"""
+        try:
+            from app.services.llm_service import get_llm_service
+
+            # Truncate if too long
+            max_input_chars = 8000
+            if len(text) > max_input_chars:
+                text = text[:max_input_chars] + "..."
+
+            llm = get_llm_service()
+            prompt = f"""Summarize the following product reviews in approximately {max_length} words.
+Focus on key points, pros, and cons.
+
+Reviews:
+{text}
+
+Summary:"""
+
+            summary = llm.generate(
+                prompt=prompt,
+                max_tokens=max_length * 2,  # Tokens ≈ words * 1.5
+                temperature=0.3,  # More deterministic
+                system_prompt="You are a helpful assistant that creates concise, accurate summaries of product reviews."
+            )
+
+            logger.info("Gemini API fallback successful")
+            return summary.strip()
+
+        except Exception as e:
+            logger.error(f"Gemini summarization failed: {str(e)}")
+            raise
 
     def _extractive_summary(self, text: str, max_length: int = 150) -> str:
         """Create extractive summary by selecting important sentences"""

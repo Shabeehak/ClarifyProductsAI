@@ -116,13 +116,23 @@ async def summarize_reviews(request: StructuredSummarizationRequest):
 async def summarization_health():
     """Check if summarization service is ready"""
     try:
-        # Check if model is loaded
-        if summarizer.pipeline is None and not summarizer.use_ollama:
-            summarizer.load_model()
+        # Check if BART model is loaded
+        model_status = "BART"
+        fallback_available = False
+
+        if summarizer.pipeline is None:
+            try:
+                summarizer.load_model()
+                model_status = "BART (loaded)"
+            except Exception as load_error:
+                logger.warning(f"BART model not available: {load_error}")
+                model_status = "BART (unavailable)"
+                fallback_available = True
 
         return {
             "status": "healthy",
-            "model": "ollama" if summarizer.use_ollama else "BART",
+            "model": model_status,
+            "gemini_fallback": fallback_available or summarizer.pipeline is None,
             "ready": True,
         }
     except Exception as e:
