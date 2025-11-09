@@ -1,21 +1,25 @@
 name: ML Model Tests
 
+# Temporarily disabled - enable when deploying to production
+# Tests require large model downloads (2.5GB+) which exceed GitHub Actions limits
+
 on:
-  push:
-    branches: [ main, develop ]
-    paths:
-      - 'backend/app/ml_models/**'
-      - 'backend/tests/ml_models/**'
-      - 'backend/app/mlops/**'
-  pull_request:
-    branches: [ main, develop ]
-    paths:
-      - 'backend/app/ml_models/**'
-      - 'backend/tests/ml_models/**'
-      - 'backend/app/mlops/**'
-  schedule:
-    # Run daily at 2 AM UTC to catch model drift
-    - cron: '0 2 * * *'
+  workflow_dispatch:  # Manual trigger only
+  # push:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'backend/app/ml_models/**'
+  #     - 'backend/tests/ml_models/**'
+  #     - 'backend/app/mlops/**'
+  # pull_request:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'backend/app/ml_models/**'
+  #     - 'backend/tests/ml_models/**'
+  #     - 'backend/app/mlops/**'
+  # schedule:
+  #   # Run daily at 2 AM UTC to catch model drift
+  #   - cron: '0 2 * * *'
 
 jobs:
   test-ml-models:
