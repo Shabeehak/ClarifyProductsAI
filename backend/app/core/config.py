@@ -20,21 +20,6 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = Field(default="INFO", env="LOG_LEVEL")
     TIMEZONE: str = "UTC"
 
-    # Database
-    DATABASE_URL: str = Field(..., env="DATABASE_URL")
-    DB_POOL_SIZE: int = 10
-    DB_MAX_OVERFLOW: int = 20
-    DB_POOL_TIMEOUT: int = 30
-    DB_ECHO: bool = False
-
-    @field_validator("DATABASE_URL")
-    @classmethod
-    def validate_database_url(cls, v: str) -> str:
-        """Validate database URL format"""
-        if not v.startswith(("postgresql://", "postgresql+asyncpg://")):
-            raise ValueError("DATABASE_URL must be a PostgreSQL connection string")
-        return v
-
     # Redis - IMPROVED
     REDIS_URL: str = Field(..., env="REDIS_URL")
     REDIS_MAX_CONNECTIONS: int = 10
@@ -45,60 +30,8 @@ class Settings(BaseSettings):
     CACHE_TTL_SECONDS: int = 86400  # 24 hours
     CACHE_MAX_SIZE: int = 1000  # Max items in memory cache
 
-    # Security
-    SECRET_KEY: str = Field(..., env="SECRET_KEY", min_length=32)
-    ALGORITHM: str = Field(
-        default="HS256",
-        env="ALGORITHM",
-        description="JWT signing algorithm (HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512)",
-    )
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-
-    @field_validator("SECRET_KEY")
-    @classmethod
-    def validate_secret_key_in_production(cls, v: str, info: ValidationInfo) -> str:
-        """Ensure SECRET_KEY is changed in production"""
-        # Get ENVIRONMENT from context (info.data contains already-validated fields)
-        environment = info.data.get("ENVIRONMENT", "development")
-        if environment == "production":
-            if "dev-secret-key" in v or len(v) < 32:
-                raise ValueError(
-                    "SECRET_KEY must be a strong random string in production! "
-                    'Generate with: python -c "import secrets; print(secrets.token_urlsafe(32))"'
-                )
-        return v
-
-    @field_validator("ALGORITHM")
-    @classmethod
-    def validate_algorithm(cls, v: str) -> str:
-        """Validate JWT algorithm is supported"""
-        supported_algorithms = {
-            # HMAC (symmetric - uses SECRET_KEY)
-            "HS256",
-            "HS384",
-            "HS512",
-            # RSA (asymmetric - uses public/private keys)
-            "RS256",
-            "RS384",
-            "RS512",
-            # ECDSA (asymmetric - uses public/private keys)
-            "ES256",
-            "ES384",
-            "ES512",
-            # PSS (RSA with PSS padding)
-            "PS256",
-            "PS384",
-            "PS512",
-        }
-
-        if v not in supported_algorithms:
-            raise ValueError(
-                f"ALGORITHM '{v}' is not supported. "
-                f"Supported algorithms: {', '.join(sorted(supported_algorithms))}"
-            )
-
-        return v
+    # Security (Not used in current stateless architecture - can be added later if authentication is needed)
+    # SECRET_KEY and JWT settings removed as app doesn't use authentication yet
 
     # CORS
     CORS_ORIGINS: List[str] = Field(
@@ -262,15 +195,6 @@ settings = get_settings()
 def validate_settings():
     """Validate critical settings on startup"""
     errors = []
-
-    # Check database connection
-    try:
-        from sqlalchemy import create_engine
-
-        engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True)
-        engine.connect().close()
-    except Exception as e:
-        errors.append(f"Database connection failed: {e}")
 
     # Check Redis connection
     try:
