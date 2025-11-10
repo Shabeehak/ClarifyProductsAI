@@ -46,7 +46,7 @@ services:
     ports:
       - "8501:8501"
     environment:
-      - BACKEND_URL=http://backend:8000
+      - API_BASE_URL=http://backend:8000/api/v1
     depends_on:
       - backend
     restart: unless-stopped
