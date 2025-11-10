@@ -51,14 +51,28 @@ Conversational AI chatbot powered by Gemini that helps you:
 
 ---
 
-## 🚀 Live Demo
+## 🚀 Live Demo & Deployment
+
+### 🌐 **Live Application (Deployed on Google Cloud Platform)**
+
+**Frontend (Streamlit UI):** [http://136.114.42.68:8501](http://136.114.42.68:8501)
+**Backend API (FastAPI):** [http://136.114.42.68:8000/docs](http://136.114.42.68:8000/docs)
+
+**Deployment Specs:**
+- **Platform**: Google Cloud Platform (GCP) e2-standard-2
+- **Resources**: 2 vCPU, 8 GB RAM, 30 GB SSD
+- **ML Models Running**: CLIP (151M params) + BART (406M params) + DistilBERT (67M params)
+- **Cost**: $0/month (using $300 GCP free credits)
+- **Uptime**: 24/7 availability
+
+### 📹 **Video Demo**
 
 [![Demo Video](https://img.shields.io/badge/Watch_Full_Demo-▶️_YouTube-red?style=for-the-badge&logo=youtube)](https://youtu.be/NKq_74M8rrw)
 
 **See the platform in action!** The demo showcases:
 - Product search with real-time analysis
-- Image recognition capabilities
-- AI chatbot conversations
+- Image recognition capabilities (CLIP model)
+- AI chatbot conversations (Gemini integration)
 - Review summarization and sentiment insights
 
 ---
