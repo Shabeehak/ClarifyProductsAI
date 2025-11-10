@@ -10,13 +10,14 @@ COPY requirements-frontend.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements-frontend.txt
 
-# Copy Streamlit config and app
-COPY .streamlit/ .streamlit/
+# Copy Streamlit app
 COPY streamlit_app.py .
-COPY assets/ assets/
+
+# Create assets directory (optional, app may reference it)
+RUN mkdir -p assets
 
 # Expose Streamlit port
 EXPOSE 8501
 
-# Run Streamlit
-CMD ["streamlit", "run", "streamlit_app.py", "--server.address", "0.0.0.0", "--server.port", "8501"]
+# Run Streamlit with headless mode
+CMD ["streamlit", "run", "streamlit_app.py", "--server.address", "0.0.0.0", "--server.port", "8501", "--server.headless", "true"]
