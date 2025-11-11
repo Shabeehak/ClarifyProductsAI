@@ -145,16 +145,15 @@ class CompleteRecognitionService:
             logger.info("Stage 3: Extracting text with OCR")
             self._load_ocr_if_needed()
 
-            ocr_result = self.ocr_engine.predict(image_path)
+            ocr_result = self.ocr_engine.ocr(image_path, cls=True)
 
             # Extract text from PaddleOCR result
-            if isinstance(ocr_result, dict) and "rec_texts" in ocr_result:
-                ocr_texts = ocr_result["rec_texts"]
-            elif isinstance(ocr_result, list) and len(ocr_result) > 0:
-                # Old PaddleOCR format
-                ocr_texts = [line[1][0] for line in ocr_result[0] if line[1][0].strip()]
-            else:
-                ocr_texts = []
+            # PaddleOCR 2.7.0.3 format: list of lists [[[bbox], (text, confidence)], ...]
+            ocr_texts = []
+            if ocr_result and isinstance(ocr_result, list) and len(ocr_result) > 0:
+                for line in ocr_result[0]:
+                    if line and len(line) > 1 and line[1] and line[1][0].strip():
+                        ocr_texts.append(line[1][0])
 
             ocr_text = " ".join(ocr_texts) if ocr_texts else ""
 
