@@ -29,14 +29,14 @@ Project submission documentation including:
 
 ---
 
-### [HOW_TO_GET_MODEL_METRICS.md](HOW_TO_GET_MODEL_METRICS.md)
-Guide for ML model performance tracking:
-- Setting up MLflow tracking server
-- Running model benchmarks
-- Registering models with metrics
-- Viewing experiments and comparing model versions
+### [TECHNICAL_DECISIONS.md](TECHNICAL_DECISIONS.md)
+Architectural and technical decision documentation:
+- Key architectural decisions with justifications
+- Technology stack choices and comparisons
+- Trade-offs analysis
+- Constraints and limitations
 
-**Use this for:** MLOps workflows and model performance monitoring.
+**Use this for:** Understanding design rationale and engineering decisions.
 
 ---
 

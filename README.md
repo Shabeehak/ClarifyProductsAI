@@ -64,7 +64,6 @@ Conversational AI chatbot powered by Gemini that helps you:
 - **Platform**: Google Cloud Platform (GCP) e2-standard-2
 - **Resources**: 2 vCPU, 8 GB RAM, 30 GB SSD
 - **ML Models Running**: CLIP (151M params) + BART (406M params) + DistilBERT (67M params)
-- **Cost**: $0/month (using $300 GCP free credits)
 - **Uptime**: 24/7 availability
 
 ### 📹 **Video Demo**
@@ -161,7 +160,7 @@ Conversational AI chatbot powered by Gemini that helps you:
 - **3-Level Fallback** for summarization: BART → Gemini → Extractive (ensures reliability)
 - **Multimodal approach**: Supports both text and image inputs
 - **Real-Time RAG**: Live data retrieval + LLM generation (no vector DB needed)
-- **Microservices-ready**: Modular design for easy scaling
+- **Modular Monolithic Architecture**: Well-organized service layer for maintainability
 
 ---
 
@@ -322,7 +321,6 @@ ClarifyProductsAI/
 │   ├── ARCHITECTURE.md       # System architecture
 │   ├── FEATURES_AND_EVALUATION.md  # Feature docs
 │   └── TECHNICAL_DECISIONS.md      # Design decisions
-├── dev-notes/                # Development notes
 ├── screenshots/              # Application screenshots
 ├── .github/workflows/        # CI/CD pipelines
 │   └── ci.yml                # GitHub Actions
@@ -402,9 +400,9 @@ Building this project provided hands-on experience with:
 - ✅ Conversational AI interface design
 
 ### **System Design**
-- ✅ Microservices architecture
+- ✅ Modular monolithic architecture with clean separation of concerns
 - ✅ Docker containerization
-- ✅ Scalable service layer design
+- ✅ Scalable service layer design (microservices-ready)
 - ✅ API security best practices
 
 ---
