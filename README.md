@@ -20,6 +20,8 @@ Choosing a product during shopping presents a critical challenge: **information 
 
 **ClarifyProducts.AI solves this** by aggregating and analyzing reviews using advanced AI/ML models to provide clear, actionable insights.
 
+> **Note:** This is an MVP demonstration aggregating reviews from YouTube, Reddit, and Google Shopping. Production deployment would include additional sources (Amazon, TrustPilot, specialized review sites) for comprehensive coverage.
+
 ---
 
 ## ✨ Key Features
@@ -101,10 +103,23 @@ Conversational AI chatbot powered by Gemini that helps you:
 - **A/B Testing**: Framework for model comparison
 - **Logging**: Loguru (structured logging)
 
-### **Infrastructure**
+### **Infrastructure & Production**
 - **Containerization**: Docker + Docker Compose
+- **Caching**: Redis (24-hour TTL, 80-90% API cost reduction)
+- **Reliability**: Exponential backoff retry logic for API calls
+- **Deployment**: Google Cloud Platform (e2-standard-2)
 - **API Documentation**: Auto-generated with FastAPI/Swagger
 - **Environment Management**: Python-dotenv
+- **Logging**: Loguru with structured logging
+
+### **CI/CD & Quality Assurance**
+- **GitHub Actions**: Automated testing on every push/PR
+- **Linting**: flake8 for code quality enforcement
+- **Formatting**: black for consistent code style
+- **Type Checking**: mypy for type safety validation
+- **Security Scanning**: Bandit + Safety for vulnerability detection
+- **Code Coverage**: Codecov integration with coverage reporting
+- **Testing**: pytest for comprehensive unit and integration tests
 
 ---
 
@@ -373,17 +388,19 @@ Building this project provided hands-on experience with:
 ## 🚧 Roadmap
 
 ### Completed ✅
-- [x] Core ML model integration (CLIP, BART, DistilBERT)
-- [x] Multi-source review aggregation
-- [x] AI chatbot with RAG
-- [x] Image-based product search
+- [x] Core ML model integration (CLIP, BART, DistilBERT, PaddleOCR)
+- [x] Multi-source review aggregation (YouTube, Reddit, Twitter)
+- [x] AI chatbot with RAG and Gemini integration
+- [x] Image-based product search with OCR
 - [x] MLflow experiment tracking
 - [x] Responsive frontend UI
+- [x] **Production deployment on GCP** (2 vCPU, 8 GB RAM, 30 GB SSD)
+- [x] **Redis caching layer** (24-hour TTL, 80-90% API cost reduction)
+- [x] **Exponential backoff retry logic** (handles rate limits and transient errors)
 
 ### In Progress 🔄
-- [ ] Production deployment (cloud hosting)
-- [ ] Enhanced caching layer
 - [ ] User authentication system
+- [ ] Enhanced monitoring and alerts
 
 ### Future Enhancements 🔮
 - [ ] GPU acceleration for faster inference

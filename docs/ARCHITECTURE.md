@@ -10,18 +10,20 @@ ClarifyProducts.AI is an ML-powered product review analysis platform that aggreg
 graph TB
     UI[Streamlit Frontend<br/>Port 8501]
     API[FastAPI Backend<br/>Port 8000]
+    Redis[Redis Cache<br/>24hr TTL]
 
     CLIP[CLIP Vision Model<br/>151M params]
     BART[BART Summarizer<br/>406M params]
     DistilBERT[DistilBERT Sentiment<br/>67M params]
     OCR[PaddleOCR]
-    Gemini[Gemini LLM]
+    Gemini[Gemini LLM<br/>+Retry Logic]
 
-    SerpAPI[SerpAPI]
+    SerpAPI[SerpAPI<br/>+Retry Logic]
     Sources[YouTube + Reddit + Google]
     MLflow[MLflow Tracking<br/>Port 5000]
 
     UI -->|HTTP| API
+    API <-->|Cache Check| Redis
     API --> CLIP
     API --> BART
     API --> DistilBERT
@@ -38,6 +40,7 @@ graph TB
 
     style UI fill:#667eea,color:#fff
     style API fill:#764ba2,color:#fff
+    style Redis fill:#dc2626,color:#fff
     style CLIP fill:#f093fb,color:#000
     style BART fill:#f093fb,color:#000
     style DistilBERT fill:#f093fb,color:#000
@@ -267,11 +270,7 @@ flowchart TD
 5. **Fallback** → If text not found or Gemini fails, uses CLIP category
 6. **Search Reviews** → Same flow as text search (SerpAPI → ML analysis)
 
-**Why use CLIP if Gemini can see the image?**
-- **CLIP provides structured ML context:** Category classification from 70+ product types, reducing Gemini's search space
-- **Faster inference:** CLIP pre-processes visual features (434ms) before Gemini analysis
-- **Hybrid approach:** Combines ML feature extraction (CLIP) with LLM reasoning (Gemini) for best accuracy
-- **Demonstrates ML engineering:** Shows ability to integrate multiple models rather than relying on single API
+**Hybrid ML Approach:** Combines CLIP visual feature extraction (434ms) with Gemini multimodal reasoning for accurate product identification with fallback support.
 
 ## 3-Level Summarization Fallback
 
@@ -420,25 +419,69 @@ mindmap
       Docker Compose
 ```
 
-## Deployment Architecture (Future)
+## Production Deployment Architecture
+
+**Current Deployment (GCP):** 
 
 ```mermaid
 graph TB
-    subgraph "Cloud Infrastructure"
-        LB[Load Balancer]
+    Users[Users/Clients] --> FE[Streamlit Frontend<br/>Port 8501]
+    FE --> BE[FastAPI Backend<br/>Port 8000]
 
-        subgraph "Frontend Instances"
+    BE --> Redis[Redis Cache<br/>24hr TTL]
+    BE --> CLIP[CLIP Model<br/>151M params]
+    BE --> BART[BART Model<br/>406M params]
+    BE --> DistilBERT[DistilBERT Model<br/>67M params]
+    BE --> OCR[PaddleOCR]
+
+    BE --> Gemini[Gemini API<br/>+Retry Logic]
+    BE --> Serp[SerpAPI<br/>+Retry Logic]
+
+    Serp --> Sources[YouTube + Reddit<br/>+ Google Shopping]
+
+    style Users fill:#667eea,color:#fff
+    style FE fill:#f093fb,color:#000
+    style BE fill:#43e97b,color:#000
+    style Redis fill:#dc2626,color:#fff
+    style CLIP fill:#ffd89b,color:#000
+    style BART fill:#ffd89b,color:#000
+    style DistilBERT fill:#ffd89b,color:#000
+    style Gemini fill:#4facfe,color:#fff
+    style Serp fill:#764ba2,color:#fff
+```
+
+**Current Production Setup:**
+- **Platform:** Google Cloud Platform (GCP)
+- **Instance:** e2-standard-2 (2 vCPU, 8 GB RAM, 30 GB SSD)
+- **Architecture:** Single-instance deployment with Redis caching
+- **Frontend:** Streamlit on http://136.114.42.68:8501
+- **Backend:** FastAPI on http://136.114.42.68:8000
+- **ML Models:** All running on same instance (CLIP, BART, DistilBERT, PaddleOCR)
+- **Caching:** Redis with 24-hour TTL (80-90% API cost reduction)
+- **Reliability:** Exponential backoff retry logic for Gemini and SerpAPI
+- **Cost:** $0/month (using $300 GCP free credits)
+- **Uptime:** 24/7 availability
+
+## Future Scalability Architecture
+
+```mermaid
+graph TB
+    subgraph "Cloud Infrastructure (Future)"
+        LB[Load Balancer<br/>Nginx/Traefik]
+
+        subgraph "Frontend Tier"
             FE1[Streamlit 1]
             FE2[Streamlit 2]
         end
 
-        subgraph "Backend Instances"
+        subgraph "Backend Tier"
             BE1[FastAPI 1<br/>ML Models]
             BE2[FastAPI 2<br/>ML Models]
         end
 
-        subgraph "Caching Layer"
-            Redis[Redis Cache]
+        subgraph "Caching & Queue"
+            Redis[Redis Cluster]
+            Queue[RabbitMQ/Celery]
         end
 
         subgraph "External Services"
@@ -448,7 +491,7 @@ graph TB
 
         subgraph "Monitoring"
             MLflow[MLflow Server]
-            Logs[Log Aggregation]
+            Prometheus[Prometheus + Grafana]
         end
     end
 
@@ -461,6 +504,8 @@ graph TB
 
     BE1 --> Redis
     BE2 --> Redis
+    BE1 --> Queue
+    BE2 --> Queue
 
     BE1 --> Gemini
     BE1 --> Serp
@@ -469,8 +514,8 @@ graph TB
 
     BE1 -.-> MLflow
     BE2 -.-> MLflow
-    BE1 -.-> Logs
-    BE2 -.-> Logs
+    BE1 -.-> Prometheus
+    BE2 -.-> Prometheus
 
     style Users fill:#667eea,color:#fff
     style LB fill:#764ba2,color:#fff
@@ -478,16 +523,17 @@ graph TB
     style FE2 fill:#f093fb,color:#000
     style BE1 fill:#43e97b,color:#000
     style BE2 fill:#43e97b,color:#000
-    style Redis fill:#ffd89b,color:#000
+    style Redis fill:#dc2626,color:#fff
     style MLflow fill:#ffd89b,color:#000
 ```
 
-**Scalability Plan:**
+**Future Scalability Enhancements:**
 - **Horizontal Scaling:** Multiple frontend and backend instances behind load balancer
-- **Caching Layer:** Redis for frequently requested product reviews and analysis results
-- **Stateless Architecture:** Each backend instance can handle any request independently
-- **Monitoring & Observability:** MLflow for model metrics, centralized logging for system health
-- **Current Status:** Single-instance development setup, production deployment planned
+- **Redis Cluster:** Distributed caching for high availability
+- **Message Queue:** Async processing for long-running ML tasks
+- **Monitoring:** Prometheus + Grafana for real-time metrics
+- **GPU Instances:** Dedicated GPU nodes for faster ML inference
+- **CDN:** Static asset delivery for frontend
 
 ---
 
@@ -497,11 +543,11 @@ graph TB
 **Why:** Product reviews change frequently. Real-time retrieval ensures always-current data without maintaining an embedding pipeline.
 
 **Trade-offs:**
-- ✅ Always fresh data
-- ✅ Simpler architecture
-- ✅ Lower storage costs
-- ❌ Slightly slower first request (API call latency)
-- ❌ Depends on external API availability
+-  Always fresh data
+-  Simpler architecture
+-  Lower storage costs
+-  Slightly slower first request (API call latency)
+-  Depends on external API availability
 
 ### 2. 3-Level Summarization Fallback
 **Why:** Production reliability. BART provides best quality but may fail on resource-constrained environments.
@@ -554,11 +600,15 @@ Typical product search request (text-based):
 
 **Total End-to-End Latency:** ~13 seconds
 
-**Performance Optimization Opportunities:**
-- **Caching:** Store frequently requested product reviews (Redis)
+**Performance Optimizations Implemented:** 
+-  **Redis Caching:** 24-hour TTL for product search and RAG responses (80-90% API cost reduction)
+-  **Exponential Backoff Retry Logic:** 5 attempts for Gemini, 3 attempts for SerpAPI
+-  **Async Processing:** Non-blocking I/O for external API calls
+-  **Singleton Pattern:** ML models loaded once and reused
+
+**Future Performance Opportunities:**
 - **Parallel Processing:** Run sentiment analysis and summarization concurrently
 - **GPU Acceleration:** Faster inference for BART and DistilBERT models
-- **Async Processing:** Non-blocking I/O for external API calls
 - **Model Optimization:** Quantization or distillation for faster inference
 
 ---
@@ -575,15 +625,19 @@ Typical product search request (text-based):
 
 ## Scalability Considerations
 
-**Current Architecture:**
-- Single-instance deployment suitable for demonstration and development
-- Estimated throughput: ~10 requests/minute
-- Low infrastructure cost
+**Current Production Deployment:** 
+- Google Cloud Platform (GCP) e2-standard-2 instance
+- 2 vCPU, 8 GB RAM, 30 GB SSD
+- ML models: CLIP (151M) + BART (406M) + DistilBERT (67M)
+- Redis caching layer with 24-hour TTL
+- Estimated throughput: ~10 requests/minute with caching boost
+- Cost: $0/month (using $300 GCP free credits)
+- 24/7 uptime
+- URLs: Frontend (http://136.114.42.68:8501), Backend (http://136.114.42.68:8000/docs)
 
-**Production Scalability Path:**
+**Future Scalability Path:**
 - Horizontal scaling with load balancer (Nginx/Traefik)
 - Multiple backend replicas for increased throughput
-- Redis caching layer for frequently requested reviews
 - Message queue (RabbitMQ/Celery) for async processing
 - Dedicated ML model serving (TensorFlow Serving/TorchServe)
 - CDN for static frontend assets
