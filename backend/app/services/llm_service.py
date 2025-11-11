@@ -8,6 +8,7 @@ from enum import Enum
 from loguru import logger
 import requests
 import os
+from app.utils.retry import retry_with_backoff
 
 
 class LLMProvider(str, Enum):
@@ -130,7 +131,7 @@ class LLMService:
         temperature: float,
         system_prompt: Optional[str],
     ) -> str:
-        """Generate using Google Gemini API"""
+        """Generate using Google Gemini API with retry logic"""
         if not self.gemini_api_key:
             raise ValueError("GEMINI_API_KEY not configured")
 
@@ -148,16 +149,25 @@ class LLMService:
             if system_prompt:
                 full_prompt = f"{system_prompt}\n\n{prompt}"
 
-            # Generate
-            response = model.generate_content(
-                full_prompt,
-                generation_config=genai.types.GenerationConfig(
-                    max_output_tokens=max_tokens,
-                    temperature=temperature,
-                ),
+            # Generate with retry logic (handles rate limits and transient errors)
+            @retry_with_backoff(
+                max_attempts=5,
+                initial_delay=1.0,
+                exp_base=2.0,
+                max_delay=30.0,
             )
+            def _call_gemini_api():
+                """Inner function with retry logic for Gemini API calls"""
+                response = model.generate_content(
+                    full_prompt,
+                    generation_config=genai.types.GenerationConfig(
+                        max_output_tokens=max_tokens,
+                        temperature=temperature,
+                    ),
+                )
+                return response.text.strip()
 
-            return response.text.strip()
+            return _call_gemini_api()
 
         except ImportError:
             raise Exception(

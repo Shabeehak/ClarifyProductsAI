@@ -7,6 +7,7 @@ from typing import Dict, List, Optional
 from loguru import logger
 import requests
 from app.core.config import settings
+from app.utils.retry import retry_with_backoff
 
 
 class GoogleShoppingService:
@@ -67,10 +68,21 @@ class GoogleShoppingService:
                 "hl": "en",  # Language: English
             }
 
-            response = requests.get(self.base_url, params=params, timeout=10)
-            response.raise_for_status()
+            # Call SerpAPI with retry logic for rate limits and transient errors
+            @retry_with_backoff(
+                max_attempts=3,
+                initial_delay=2.0,
+                exp_base=2.0,
+                max_delay=30.0,
+                exceptions=(requests.Timeout, requests.ConnectionError, requests.HTTPError),
+            )
+            def _call_serpapi():
+                """Inner function with retry logic for SerpAPI calls"""
+                response = requests.get(self.base_url, params=params, timeout=10)
+                response.raise_for_status()
+                return response.json()
 
-            data = response.json()
+            data = _call_serpapi()
 
             # Extract shopping results
             shopping_results = data.get("shopping_results", [])
