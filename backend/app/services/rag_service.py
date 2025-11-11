@@ -6,10 +6,13 @@ Orchestrates real-time review fetching and generation with LLM
 from typing import List, Dict, Optional
 from loguru import logger
 import requests
+import hashlib
+import json
 
 from app.services.smart_product_service import get_smart_product_service
 from app.services.llm_service import get_llm_service
 from app.core.config import settings
+from app.db.redis_client import get_redis_client
 
 
 class RAGService:
@@ -19,7 +22,9 @@ class RAGService:
         """Initialize RAG service"""
         self.product_service = get_smart_product_service()
         self.llm_service = get_llm_service()
-        logger.info("RAG service initialized with LLM support")
+        self.redis_client = get_redis_client()
+        self.cache_ttl = settings.CACHE_TTL_SECONDS  # 24 hours
+        logger.info("RAG service initialized with LLM support and Redis caching")
 
     # ADD NEW METHOD:
     async def retrieve_context_realtime(
@@ -212,6 +217,15 @@ Detailed Answer:"""
             logger.warning("All LLM providers failed, using extractive fallback")
             return self._extractive_fallback(query, context)
 
+    def _generate_cache_key(self, query: str, n_results: int) -> str:
+        """Generate cache key from query and parameters"""
+        # Normalize query (lowercase, strip whitespace)
+        normalized = query.lower().strip()
+        # Create hash for cache key
+        cache_data = f"{normalized}:{n_results}"
+        hash_key = hashlib.md5(cache_data.encode()).hexdigest()
+        return f"rag:query:{hash_key}"
+
     async def rag_query(
         self,
         query: str,
@@ -219,34 +233,49 @@ Detailed Answer:"""
         n_results: int = 10,
     ) -> Dict:
         """
-        Complete RAG pipeline: Retrieve + Generate
+        Complete RAG pipeline: Retrieve + Generate (with Redis caching)
 
         Args:
             query: User query
             product_id: Optional product filter
             n_results: Number of contexts to retrieve
-            model: LLM model
 
         Returns:
             Dict with response and sources
         """
         try:
+            # Check cache first
+            cache_key = self._generate_cache_key(query, n_results)
+            cached_result = self.redis_client.get(cache_key)
+
+            if cached_result:
+                logger.info(f"✅ Cache HIT for RAG query: {query[:50]}...")
+                try:
+                    return json.loads(cached_result)
+                except json.JSONDecodeError:
+                    logger.warning("Failed to decode cached RAG result, regenerating")
+
+            logger.info(f"❌ Cache MISS for RAG query: {query[:50]}...")
+
             # Step 1: Retrieve real-time context
             context = await self.retrieve_context_realtime(query, n_results)
 
             if not context:
-                return {
+                result = {
                     "response": "I couldn't find recent reviews for this product. Could you provide more details or try a different product name?",
                     "sources": [],
                     "context_count": 0,
                     "realtime": True,
+                    "cached": False,
                 }
+                # Don't cache "not found" results
+                return result
 
             # Step 2: Generate response with Gemini
             response = self.generate_response(query, context)
 
-            # Step 3: Return with sources
-            return {
+            # Step 3: Build result
+            result = {
                 "response": response,
                 "sources": [
                     {
@@ -257,7 +286,8 @@ Detailed Answer:"""
                     for c in context[:5]
                 ],
                 "context_count": len(context),
-                "realtime": True,  # Flag to indicate real-time data
+                "realtime": True,
+                "cached": False,
                 "sources_breakdown": {
                     "youtube": len(
                         [c for c in context if c["metadata"]["source"] == "YouTube"]
@@ -271,6 +301,19 @@ Detailed Answer:"""
                 },
             }
 
+            # Cache the successful result for 24 hours
+            try:
+                self.redis_client.setex(
+                    cache_key,
+                    self.cache_ttl,
+                    json.dumps(result)
+                )
+                logger.info(f"💾 Cached RAG result for: {query[:50]}...")
+            except Exception as cache_error:
+                logger.warning(f"Failed to cache RAG result: {cache_error}")
+
+            return result
+
         except Exception as e:
             logger.error(f"Error in real-time RAG query: {str(e)}")
             return {
@@ -278,6 +321,7 @@ Detailed Answer:"""
                 "sources": [],
                 "context_count": 0,
                 "realtime": False,
+                "cached": False,
             }
 
     def _format_context(self, context: List[Dict]) -> str:
