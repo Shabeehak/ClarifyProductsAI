@@ -22,7 +22,7 @@ numpy==1.26.2  # Numerical operations
 # ============================================================================
 pillow==10.1.0  # Image processing
 opencv-python==4.8.1.78  # Computer vision utilities
-paddlepaddle==2.5.1  # PaddlePaddle framework (required for paddleocr)
+paddlepaddle==2.6.1  # PaddlePaddle framework (required for paddleocr)
 paddleocr==2.7.0.3  # Primary OCR engine (production)
 easyocr==1.7.1  # Fallback OCR engine (experiments)
 
