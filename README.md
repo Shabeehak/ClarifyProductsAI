@@ -288,23 +288,47 @@ docker-compose down
 ClarifyProductsAI/
 ├── backend/
 │   ├── app/
-│   │   ├── api/              # API endpoints
+│   │   ├── api/
+│   │   │   └── v1/           # API v1 endpoints
+│   │   ├── core/             # Core configuration
+│   │   │   ├── config.py     # Environment settings
+│   │   │   ├── exceptions.py # Custom exceptions
+│   │   │   └── logging_config.py
 │   │   ├── ml_models/        # ML model implementations
 │   │   │   ├── clip_recognizer.py
 │   │   │   ├── sentiment_analyzer.py
 │   │   │   └── summarizer.py
-│   │   ├── services/         # Business logic
-│   │   │   ├── llm_service.py
-│   │   │   ├── rag_service.py
-│   │   │   └── search_service.py
+│   │   ├── services/         # Business logic services
+│   │   │   ├── cache_service.py  # Redis caching
+│   │   │   ├── complete_recognition_service.py
+│   │   │   ├── llm_service.py    # Gemini integration
+│   │   │   ├── rag_service.py    # RAG pipeline
+│   │   │   ├── smart_product_service.py
+│   │   │   └── [8 more services]
+│   │   ├── schemas/          # Pydantic models
+│   │   ├── utils/            # Utility functions
+│   │   ├── mlops/            # MLflow integration
 │   │   └── main.py           # FastAPI application
 │   ├── scripts/              # Utility scripts
-│   │   └── register_models.py  # MLflow registration
+│   │   ├── register_models.py
+│   │   ├── measure_model_metrics.py
+│   │   └── ab_testing_example.py
 │   ├── tests/                # Unit & integration tests
-│   └── requirements.txt      # Python dependencies
+│   │   ├── unit/
+│   │   └── integration/
+│   ├── requirements.txt      # Python dependencies
+│   └── .env.example          # Environment template
+├── docs/                     # Documentation
+│   ├── ARCHITECTURE.md       # System architecture
+│   ├── FEATURES_AND_EVALUATION.md  # Feature docs
+│   └── TECHNICAL_DECISIONS.md      # Design decisions
+├── dev-notes/                # Development notes
 ├── screenshots/              # Application screenshots
+├── .github/workflows/        # CI/CD pipelines
+│   └── ci.yml                # GitHub Actions
 ├── streamlit_app.py          # Streamlit frontend
 ├── docker-compose.yml        # Docker orchestration
+├── Dockerfile.frontend       # Frontend container
 └── README.md                 # This file
 ```
 
@@ -432,7 +456,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👤 Author
 
-**Your Name**
+**Shabeeha Kalathumpadiyil**
 
 - GitHub: [@Shabeehak](https://github.com/Shabeehak)
 - LinkedIn: [Shabeeha K](https://www.linkedin.com/in/shabeeha-kalathumpadiyil/)
