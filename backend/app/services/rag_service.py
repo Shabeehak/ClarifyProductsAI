@@ -8,11 +8,11 @@ from loguru import logger
 import requests
 import hashlib
 import json
+import redis
 
 from app.services.smart_product_service import get_smart_product_service
 from app.services.llm_service import get_llm_service
 from app.core.config import settings
-from app.db.redis_client import get_redis_client
 
 
 class RAGService:
@@ -22,9 +22,21 @@ class RAGService:
         """Initialize RAG service"""
         self.product_service = get_smart_product_service()
         self.llm_service = get_llm_service()
-        self.redis_client = get_redis_client()
+
+        # Initialize Redis client for caching
+        try:
+            self.redis_client = redis.from_url(
+                settings.REDIS_URL,
+                decode_responses=True,
+                socket_connect_timeout=5
+            )
+            self.redis_client.ping()  # Test connection
+            logger.info("RAG service initialized with LLM support and Redis caching")
+        except Exception as e:
+            logger.warning(f"Redis connection failed, caching disabled: {e}")
+            self.redis_client = None
+
         self.cache_ttl = settings.CACHE_TTL_SECONDS  # 24 hours
-        logger.info("RAG service initialized with LLM support and Redis caching")
 
     # ADD NEW METHOD:
     async def retrieve_context_realtime(
@@ -244,18 +256,23 @@ Detailed Answer:"""
             Dict with response and sources
         """
         try:
-            # Check cache first
+            # Check cache first (if Redis is available)
             cache_key = self._generate_cache_key(query, n_results)
-            cached_result = self.redis_client.get(cache_key)
-
-            if cached_result:
-                logger.info(f"✅ Cache HIT for RAG query: {query[:50]}...")
+            if self.redis_client:
                 try:
-                    return json.loads(cached_result)
-                except json.JSONDecodeError:
-                    logger.warning("Failed to decode cached RAG result, regenerating")
+                    cached_result = self.redis_client.get(cache_key)
+                    if cached_result:
+                        logger.info(f"✅ Cache HIT for RAG query: {query[:50]}...")
+                        try:
+                            return json.loads(cached_result)
+                        except json.JSONDecodeError:
+                            logger.warning("Failed to decode cached RAG result, regenerating")
+                except Exception as e:
+                    logger.warning(f"Cache read failed: {e}")
 
-            logger.info(f"❌ Cache MISS for RAG query: {query[:50]}...")
+                logger.info(f"❌ Cache MISS for RAG query: {query[:50]}...")
+            else:
+                logger.debug("Redis not available, skipping cache lookup")
 
             # Step 1: Retrieve real-time context
             context = await self.retrieve_context_realtime(query, n_results)
@@ -301,16 +318,17 @@ Detailed Answer:"""
                 },
             }
 
-            # Cache the successful result for 24 hours
-            try:
-                self.redis_client.setex(
-                    cache_key,
-                    self.cache_ttl,
-                    json.dumps(result)
-                )
-                logger.info(f"💾 Cached RAG result for: {query[:50]}...")
-            except Exception as cache_error:
-                logger.warning(f"Failed to cache RAG result: {cache_error}")
+            # Cache the successful result for 24 hours (if Redis is available)
+            if self.redis_client:
+                try:
+                    self.redis_client.setex(
+                        cache_key,
+                        self.cache_ttl,
+                        json.dumps(result)
+                    )
+                    logger.info(f"💾 Cached RAG result for: {query[:50]}...")
+                except Exception as cache_error:
+                    logger.warning(f"Failed to cache RAG result: {cache_error}")
 
             return result
 
