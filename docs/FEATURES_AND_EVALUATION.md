@@ -10,7 +10,6 @@
 7. [Deployment Information](#deployment-information)
 8. [Challenges Faced & Solutions](#challenges-faced--solutions)
 9. [Project Limitations & Future Work](#project-limitations--future-work)
-10. [Lessons Learned](#lessons-learned)
 
 ---
 
