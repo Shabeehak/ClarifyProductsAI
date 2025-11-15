@@ -7,48 +7,99 @@ ClarifyProducts.AI is an ML-powered product review analysis platform that aggreg
 ## High-Level Architecture
 
 ```mermaid
-graph TB
-    UI[Streamlit Frontend<br/>Port 8501]
-    API[FastAPI Backend<br/>Port 8000]
-    Redis[Redis Cache<br/>24hr TTL]
+graph LR
+    UI["Streamlit Frontend<br/>Port 8501"]
 
-    CLIP[CLIP Vision Model<br/>151M params]
-    BART[BART Summarizer<br/>406M params]
-    DistilBERT[DistilBERT Sentiment<br/>67M params]
-    OCR[PaddleOCR]
-    Gemini[Gemini LLM<br/>+Retry Logic]
+    subgraph API["FastAPI Backend<br/>Port 8000"]
+        ROUTES["API v1 Routes"]
+        SERVICES["Service Layer<br/>• Recognition Service<br/>• Smart Product Service<br/>• RAG Service<br/>• LLM Service<br/>• Cache Service"]
+        CACHE["Redis Cache<br/>24h TTL"]
+        MLOPS["MLflow Tracking"]
+    end
 
-    SerpAPI[SerpAPI<br/>+Retry Logic]
-    Sources[YouTube + Reddit + Google]
-    MLflow[MLflow Tracking<br/>Port 5000]
+    subgraph MODELS["Local ML Models"]
+        CLIP["CLIP ViT-B/32<br/>Image Category Recognition"]
+        OCR["PaddleOCR<br/>Text Extraction"]
+        BART["BART Large-CNN<br/>Review Summarization"]
+        DISTILBERT["DistilBERT<br/>Sentiment Analysis"]
+    end
 
-    UI -->|HTTP| API
-    API <-->|Cache Check| Redis
-    API --> CLIP
-    API --> BART
-    API --> DistilBERT
-    API --> OCR
-    API --> Gemini
-    API --> SerpAPI
+    subgraph LLM["External LLM"]
+        GEM["Gemini Multimodal<br/>Product Identification"]
+    end
 
-    SerpAPI --> Sources
+    subgraph SEARCH["External Review Sources"]
+        SERP["SerpAPI (Retry Logic)"]
+        GOOGLE["Google Shopping"]
+        YT["YouTube Reviews"]
+        REDDIT["Reddit Discussions"]
+    end
 
-    CLIP -.->|Metrics| MLflow
-    BART -.->|Metrics| MLflow
-    DistilBERT -.->|Metrics| MLflow
-    OCR -.->|Metrics| MLflow
+    UI --> ROUTES
+    ROUTES --> SERVICES
 
-    style UI fill:#667eea,color:#fff
-    style API fill:#764ba2,color:#fff
-    style Redis fill:#dc2626,color:#fff
-    style CLIP fill:#f093fb,color:#000
-    style BART fill:#f093fb,color:#000
-    style DistilBERT fill:#f093fb,color:#000
-    style Gemini fill:#4facfe,color:#fff
-    style SerpAPI fill:#43e97b,color:#000
-    style MLflow fill:#ffd89b,color:#000
+    SERVICES --> CACHE
+    SERVICES --> CLIP
+    SERVICES --> OCR
+    SERVICES --> BART
+    SERVICES --> DISTILBERT
+    SERVICES --> GEM
+
+    SERVICES --> SERP
+    SERP --> GOOGLE
+    SERP --> YT
+    SERP --> REDDIT
+
+    CLIP -.-> MLOPS
+    OCR -.-> MLOPS
+    BART -.-> MLOPS
+    DISTILBERT -.-> MLOPS
+
+    SERVICES --> UI
+
+    %% ----------------------------------
+    %% COLOR DEFINITIONS
+    %% ----------------------------------
+    classDef ui fill:#4f8ef7,stroke:#1e3a8a,color:#fff,font-weight:bold;
+    classDef api fill:#7c3aed,stroke:#4c1d95,color:#fff;
+    classDef services fill:#6d28d9,stroke:#4c1d95,color:#fff;
+    classDef cache fill:#dc2626,stroke:#7f1d1d,color:#fff;
+    classDef mlops fill:#d4d4d4,stroke:#999,color:#000;
+
+    classDef models fill:#34d399,stroke:#065f46,color:#000;
+    classDef clip fill:#6ee7b7,stroke:#065f46,color:#000;
+    classDef bart fill:#f9a8d4,stroke:#be185d,color:#000;
+    classDef distil fill:#fcd34d,stroke:#b45309,color:#000;
+    classDef ocr fill:#86efac,stroke:#166534,color:#000;
+
+    classDef llm fill:#4f46e5,stroke:#312e81,color:#fff;
+
+    classDef search fill:#facc15,stroke:#b45309,color:#000;
+    classDef serp fill:#fbbf24,stroke:#b45309,color:#000;
+
+    %% ASSIGN COLORS
+    class UI ui;
+    class API api;
+    class ROUTES api;
+    class SERVICES services;
+    class CACHE cache;
+    class MLOPS mlops;
+
+    class MODELS models;
+    class CLIP clip;
+    class BART bart;
+    class DISTILBERT distil;
+    class OCR ocr;
+
+    class LLM llm;
+    class GEM llm;
+
+    class SEARCH search;
+    class SERP serp;
+    class GOOGLE search;
+    class YT search;
+    class REDDIT search;
 ```
-
 ## Data Flow Architecture
 
 ### Text Search User Experience Flow
@@ -63,7 +114,7 @@ flowchart TD
     D --> E
 
     E --> F[Fetch Reviews from<br/>Multiple Sources]
-    F --> G[YouTube + Reddit +<br/>Google Shopping]
+    F --> G[YouTube + Reddit + Twitter<br/>Google Shopping]
 
     G --> H[Sentiment Analysis<br/>DistilBERT]
     H --> I[Calculate Sentiment<br/>Distribution]

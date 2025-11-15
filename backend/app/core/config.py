@@ -133,12 +133,6 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL: str = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
 
-    # AWS S3
-    AWS_ACCESS_KEY_ID: str = ""
-    AWS_SECRET_ACCESS_KEY: str = ""
-    AWS_S3_BUCKET_NAME: str = "clarifyproducts-images"
-    AWS_REGION: str = "us-east-1"
-
     # Monitoring
     SENTRY_DSN: Optional[str] = None
     ENABLE_METRICS: bool = True

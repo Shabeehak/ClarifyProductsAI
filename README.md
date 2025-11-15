@@ -20,7 +20,7 @@ Choosing a product during shopping presents a critical challenge: **information 
 
 **ClarifyProducts.AI solves this** by aggregating and analyzing reviews using advanced AI/ML models to provide clear, actionable insights.
 
-> **Note:** This is an MVP demonstration aggregating reviews from YouTube, Reddit, and Google Shopping. Production deployment would include additional sources (Amazon, TrustPilot, specialized review sites) for comprehensive coverage.
+> **Note:** This is an MVP demonstration aggregating reviews from YouTube, Reddit, Twitter and Google Shopping. Production deployment would include additional sources (Amazon, TrustPilot, specialized review sites) for comprehensive coverage.
 
 ---
 
@@ -32,7 +32,7 @@ Search products by name and get instant access to aggregated review analysis fro
 ![Product Search Interface](screenshots/textsearch_interface_screenshot.png)
 
 ### 📸 Image-Based Product Recognition
-Upload a product image and let AI automatically identify the product and fetch review insights using CLIP (Vision Transformer).
+Upload a product image and let AI automatically identify the product and fetch review insights using CLIP + OCR + Gemini - (Multimodal Approach).
 
 ![Image Upload Interface](screenshots/imageUpload_interface_screenshot.png)
 
@@ -72,9 +72,11 @@ Conversational AI chatbot powered by Gemini that helps you:
 
 **See the platform in action!** The demo showcases:
 - Product search with real-time analysis
-- Image recognition capabilities (CLIP model)
+- Image recognition capabilities (Multimodal Approach)
 - AI chatbot conversations (Gemini integration)
 - Review summarization and sentiment insights
+- Review youtube video recommendation
+- Breakdown of sources
 
 ---
 
@@ -152,7 +154,8 @@ Conversational AI chatbot powered by Gemini that helps you:
     │  (SerpAPI)              │
     │  • YouTube Reviews      │
     │  • Reddit Discussions   │
-    │  • Google Shopping      │
+    │  • Google Shopping      |
+    |  • Twitter              |    │
     └─────────────────────────┘
 ```
 
@@ -207,6 +210,7 @@ source venv/bin/activate
 
 3. **Install dependencies**
 ```bash
+pip install -r requirements-frontend.txt
 cd backend
 pip install -r requirements.txt
 ```
@@ -377,39 +381,39 @@ mlflow ui
 Building this project provided hands-on experience with:
 
 ### **Machine Learning**
-- ✅ Implementing multiple transformer models (CLIP, BART, DistilBERT)
-- ✅ Handling multimodal inputs (text + images)
-- ✅ Model performance benchmarking and optimization
-- ✅ Designing fallback strategies for production reliability
+-  Implementing multiple transformer models (CLIP, BART, DistilBERT)
+-  Handling multimodal inputs (text + images)
+-  Model performance benchmarking and optimization
+-  Designing fallback strategies for production reliability
 
 ### **MLOps**
-- ✅ Experiment tracking with MLflow
-- ✅ A/B testing framework for model comparison
-- ✅ Performance monitoring and logging
-- ✅ Model versioning and metadata management
+-  Experiment tracking with MLflow
+-  A/B testing framework for model comparison
+-  Performance monitoring and logging
+-  Model versioning and metadata management
 
 ### **Backend Development**
-- ✅ Building RESTful APIs with FastAPI
-- ✅ Implementing RAG (Retrieval Augmented Generation)
-- ✅ Real-time data aggregation from multiple sources
-- ✅ Error handling and API resilience
+-  Building RESTful APIs with FastAPI
+-  Implementing RAG (Retrieval Augmented Generation)
+-  Real-time data aggregation from multiple sources
+-  Error handling and API resilience
 
 ### **Frontend Development**
-- ✅ Creating responsive UI with Streamlit
-- ✅ Real-time data visualization
-- ✅ Conversational AI interface design
+-  Creating responsive UI with Streamlit
+-  Real-time data visualization
+-  Conversational AI interface design
 
 ### **System Design**
-- ✅ Modular monolithic architecture with clean separation of concerns
-- ✅ Docker containerization
-- ✅ Scalable service layer design (microservices-ready)
-- ✅ API security best practices
+-  Modular monolithic architecture with clean separation of concerns
+-  Docker containerization
+-  Scalable service layer design (microservices-ready)
+-  API security best practices
 
 ---
 
 ## 🚧 Roadmap
 
-### Completed ✅
+### Completed 
 - [x] Core ML model integration (CLIP, BART, DistilBERT, PaddleOCR)
 - [x] Multi-source review aggregation (YouTube, Reddit, Twitter)
 - [x] AI chatbot with RAG and Gemini integration
@@ -420,11 +424,11 @@ Building this project provided hands-on experience with:
 - [x] **Redis caching layer** (24-hour TTL, 80-90% API cost reduction)
 - [x] **Exponential backoff retry logic** (handles rate limits and transient errors)
 
-### In Progress 🔄
+### In Progress 
 - [ ] User authentication system
 - [ ] Enhanced monitoring and alerts
 
-### Future Enhancements 🔮
+### Future Enhancements 
 - [ ] GPU acceleration for faster inference
 - [ ] Support for more review sources
 - [ ] Price tracking and comparison
