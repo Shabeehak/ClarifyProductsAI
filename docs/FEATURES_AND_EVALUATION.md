@@ -50,77 +50,77 @@ ClarifyProducts.AI aggregates reviews from multiple sources and provides:
 ### Functional Requirements 
 
 #### 1. Text-Based Product Search
-- [x] User can search products by name
-- [x] System detects and corrects typos in product names
-- [x] Query normalization for better search results
-- [x] Aggregates reviews from YouTube, Reddit, Google Shopping
-- [x] Displays sentiment distribution (Positive, Neutral, Negative)
-- [x] Generates AI summary of reviews
-- [x] Extracts pros and cons automatically
-- [x] Provides purchase recommendation based on sentiment
-- [x] Shows source links for all reviews
+-  User can search products by name
+-  System detects and corrects typos in product names
+-  Query normalization for better search results
+-  Aggregates reviews from YouTube, Reddit, Google Shopping
+-  Displays sentiment distribution (Positive, Neutral, Negative)
+-  Generates AI summary of reviews
+-  Extracts pros and cons automatically
+-  Provides purchase recommendation based on sentiment
+-  Shows source links for all reviews
 
 #### 2. Image-Based Product Search
-- [x] User can upload product image
-- [x] Quality check validates image before processing
-- [x] CLIP model classifies product category (70+ categories)
-- [x] PaddleOCR extracts text from product packaging
-- [x] Gemini multimodal analysis identifies product name
-- [x] Fallback to category-based search if product name unclear
-- [x] Returns same comprehensive analysis as text search
+-  User can upload product image
+-  Quality check validates image before processing
+-  CLIP model classifies product category (70+ categories)
+-  PaddleOCR extracts text from product packaging
+-  Gemini multimodal analysis identifies product name
+-  Fallback to category-based search if product name unclear
+-  Returns same comprehensive analysis as text search
 
 #### 3. AI Chatbot (RAG)
-- [x] User can ask questions about products
-- [x] Real-time context retrieval from multiple sources
-- [x] Gemini LLM generates contextual responses
-- [x] Returns source attribution for transparency
-- [x] Conversational interface with chat history
+-  User can ask questions about products
+-  Real-time context retrieval from multiple sources
+-  Gemini LLM generates contextual responses
+-  Returns source attribution for transparency
+-  Conversational interface with chat history
 
 #### 4. ML Model Integration
-- [x] CLIP vision model for image recognition (151M params)
-- [x] BART model for text summarization (406M params)
-- [x] DistilBERT for sentiment analysis (67M params)
-- [x] PaddleOCR for text extraction from images
-- [x] 3-level summarization fallback (BART → Gemini → Extractive)
+-  CLIP vision model for image recognition (151M params)
+-  BART model for text summarization (406M params)
+-  DistilBERT for sentiment analysis (67M params)
+-  PaddleOCR for text extraction from images
+-  3-level summarization fallback (BART → Gemini → Extractive)
 
 #### 5. MLOps Implementation
-- [x] MLflow experiment tracking server running
-- [x] All models registered with performance metrics
-- [x] Model load time, inference time, accuracy tracked
-- [x] A/B testing framework implemented
-- [x] Structured logging with Loguru
+-  MLflow experiment tracking server running
+-  All models registered with performance metrics
+-  Model load time, inference time, accuracy tracked
+-  A/B testing framework implemented
+-  Structured logging with Loguru
 
 ### Non-Functional Requirements 
 
 #### Performance
-- [x] Average text search response time: ~13 seconds
-- [x] Average image recognition time: ~8 seconds
-- [x] Average chatbot response time: ~5 seconds
-- [x] API response time < 50ms (excluding ML processing)
+-  Average text search response time: ~13 seconds
+-  Average image recognition time: ~8 seconds
+-  Average chatbot response time: ~5 seconds
+-  API response time < 50ms (excluding ML processing)
 
 #### Scalability
-- [x] Stateless backend architecture
-- [x] Horizontal scaling ready
-- [x] Docker containerization
-- [x] RESTful API design
+-  Stateless backend architecture
+-  Horizontal scaling ready
+-  Docker containerization
+-  RESTful API design
 
 #### Reliability
-- [x] 3-level fallback for summarization ensures 100% uptime
-- [x] Error handling for poor quality images
-- [x] Graceful degradation when external APIs fail
+-  3-level fallback for summarization ensures 100% uptime
+-  Error handling for poor quality images
+-  Graceful degradation when external APIs fail
 
 #### Security
-- [x] API keys stored in .env (never committed)
-- [x] FastAPI request validation
-- [x] CORS configured
-- [x] Input sanitization
+-  API keys stored in .env (never committed)
+-  FastAPI request validation
+-  CORS configured
+-  Input sanitization
 
 #### Documentation
-- [x] Comprehensive README.md
-- [x] System architecture documentation (ARCHITECTURE.md)
-- [x] API documentation (auto-generated Swagger)
-- [x] MLflow metrics dashboard
-- [x] Demo video
+-  Comprehensive README.md
+-  System architecture documentation (ARCHITECTURE.md)
+-  API documentation (auto-generated Swagger)
+-  MLflow metrics dashboard
+-  Demo video
 
 ---
 
@@ -443,7 +443,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for complete technical details including:
 -  MLflow server on port 5000
 -  Docker Compose configuration ready
 
-**Production Deployment:** ✅ **LIVE**
+**Production Deployment:**  **LIVE**
 -  Google Cloud Platform (GCP) deployment
 -  Instance: e2-standard-2 (2 vCPU, 8 GB RAM, 30 GB SSD)
 -  Frontend: http://136.114.42.68:8501
@@ -468,29 +468,29 @@ LOG_LEVEL=INFO
 
 ## Project Deliverables
 
-### Documentation ✅
-- [x] README.md (comprehensive setup guide)
-- [x] ARCHITECTURE.md (system design and diagrams)
-- [x] FEATURES_AND_EVALUATION.md (this document)
-- [x] TECHNICAL_DECISIONS.md (architectural decisions)
-- [x] API documentation (Swagger auto-generated)
+### Documentation 
+-  README.md (comprehensive setup guide)
+-  ARCHITECTURE.md (system design and diagrams)
+-  FEATURES_AND_EVALUATION.md (this document)
+-  TECHNICAL_DECISIONS.md (architectural decisions)
+-  API documentation (Swagger auto-generated)
 
-### Code ✅
-- [x] Complete backend implementation
-- [x] Complete frontend implementation
-- [x] ML model integration
-- [x] Unit tests
-- [x] Docker configuration
+### Code 
+-  Complete backend implementation
+-  Complete frontend implementation
+-  ML model integration
+-  Unit tests
+-  Docker configuration
 
-### Media ✅
-- [x] Demo video (YouTube)
-- [x] Screenshots (5+ images in README)
-- [x] Architecture diagrams (8 Mermaid diagrams)
+### Media 
+-  Demo video (YouTube)
+-  Screenshots (5+ images in README)
+-  Architecture diagrams (8 Mermaid diagrams)
 
-### Deployment ✅
-- [x] Cloud hosting setup (GCP e2-standard-2)
-- [x] Production .env configuration
-- [x] Live URL (Frontend: http://136.114.42.68:8501, Backend: http://136.114.42.68:8000/docs)
+### Deployment 
+-  Cloud hosting setup (GCP e2-standard-2)
+-  Production .env configuration
+-  Live URL (Frontend: http://136.114.42.68:8501, Backend: http://136.114.42.68:8000/docs)
 
 ---
 
@@ -654,10 +654,10 @@ LOG_LEVEL=INFO
 - System fails if SerpAPI is down
 - Monthly quota limits demonstration
 
-**Implemented Solutions:** ✅
-- ✅ Redis caching layer (24-hour TTL, 80-90% API cost reduction)
-- ✅ Exponential backoff retry logic (handles rate limits and transient errors)
-- ✅ Graceful degradation when Redis unavailable
+**Implemented Solutions:** 
+-  Redis caching layer (24-hour TTL, 80-90% API cost reduction)
+-  Exponential backoff retry logic (handles rate limits and transient errors)
+-  Graceful degradation when Redis unavailable
 
 **Future Work:**
 - Build additional fallback data sources
@@ -759,77 +759,20 @@ LOG_LEVEL=INFO
 
 ### Future Enhancements
 
-#### Short-Term (1-3 Months)
-- [x] Implement Redis caching layer (24-hour TTL)
-- [x] Deploy on cloud platform (GCP e2-standard-2)
-- [x] Exponential backoff retry logic
-- [ ] Add rate limiting and authentication
-- [ ] Improve error handling and logging
-- [ ] Implement A/B testing for model comparison
-
 #### Medium-Term (3-6 Months)
-- [ ] GPU-enabled deployment for faster inference
-- [ ] Model quantization for edge deployment
-- [ ] Custom fine-tuning on product review data
-- [ ] Multi-language support
-- [ ] Mobile-responsive frontend redesign
+-  Add authentication
+-  GPU-enabled deployment for faster inference
+-  Model quantization for edge deployment
+-  Custom fine-tuning on product review data
+-  Multi-language support
+-  Mobile-responsive frontend redesign
+-  Add more platform for reviews
 
 #### Long-Term (6-12 Months)
-- [ ] Build proprietary review dataset
-- [ ] Train custom product recognition model
-- [ ] Implement recommendation engine
-- [ ] User authentication and personalization
-- [ ] Real-time price tracking integration
-- [ ] Mobile application (React Native)
+-  Build proprietary review dataset
+-  Train custom product recognition model
+-  User authentication and personalization
+-  Real-time price tracking integration
+-  Mobile application (React Native)
 
 ---
-
-## Lessons Learned
-
-### Technical Learnings
-
-1. **ML Engineering vs API Usage:**
-   - Building ML pipelines (CLIP + OCR) demonstrates more skills than using black-box APIs
-   - Hybrid approaches (ML + LLM) often outperform single-model solutions
-   - Fallback strategies are essential for production reliability
-
-2. **Real-Time vs Batch Processing:**
-   - Real-time retrieval ensures fresh data but adds latency
-   - Trade-offs between accuracy, speed, and cost
-   - Caching is critical for production systems
-
-3. **MLOps Importance:**
-   - Experiment tracking (MLflow) invaluable for model comparison
-   - Performance metrics must be measured, not assumed
-   - Documentation and reproducibility are crucial
-
-### Project Management Learnings
-
-1. **Time Management:**
-   - Prioritize working features over perfect architecture
-   - Document decisions as you make them
-   - Demo video recording early avoids last-minute rush
-
-2. **Architecture Decisions:**
-   - Start simple, add complexity when needed
-   - Consider portfolio value of technical choices
-   - Balance ideal solution vs time constraints
-
-3. **Documentation:**
-   - Architecture diagrams save explanation time
-   - Clear README reduces setup friction
-   - Acceptance criteria guide development
-
----
-
-## Contact Information
-
-**Developer:** Shabeeha K \
-**GitHub:** [@Shabeehak](https://github.com/Shabeehak) \
-**LinkedIn:** [Shabeeha K](https://www.linkedin.com/in/shabeeha-kalathumpadiyil/) \
-**Email:** shabi.k864@gmail.com \
-**Portfolio:** [Shabeeha.com](https://www.datascienceportfol.io/Shabeeha)
-
----
-
-**Last Updated:** November 2025
