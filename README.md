@@ -1,5 +1,10 @@
+![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-009688?style=flat-square&logo=fastapi)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-FF4B4B?style=flat-square&logo=streamlit)
+![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=flat-square&logo=docker)
+![GCP](https://img.shields.io/badge/GCP-Deployed-4285F4?style=flat-square&logo=google-cloud)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 # ClarifyProducts.AI
-
 **AI-Powered Product Review Intelligence Platform**
 
 Transform how you make purchasing decisions with comprehensive AI-driven product analysis, sentiment insights, and intelligent recommendations based on thousands of real customer reviews.
@@ -7,7 +12,6 @@ Transform how you make purchasing decisions with comprehensive AI-driven product
 [![Watch Demo Video](https://img.shields.io/badge/▶️_Watch_Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/NKq_74M8rrw)
 
 📄 **Documentation:** [System Architecture](docs/ARCHITECTURE.md) | [Features & Evaluation Criteria](docs/FEATURES_AND_EVALUATION.md)
-
 ---
 
 ## 🎯 Problem Statement
@@ -23,7 +27,6 @@ Choosing a product during shopping presents a critical challenge: **information 
 > **Note:** This is an MVP demonstration aggregating reviews from YouTube, Reddit, Twitter and Google Shopping. Production deployment would include additional sources (Amazon, TrustPilot, specialized review sites) for comprehensive coverage.
 
 ---
-
 ## ✨ Key Features
 
 ### 🔍 Smart Product Search
