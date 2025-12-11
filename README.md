@@ -4,6 +4,9 @@
 ![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=flat-square&logo=docker)
 ![GCP](https://img.shields.io/badge/GCP-Deployed-4285F4?style=flat-square&logo=google-cloud)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+
+[![CI/CD](https://github.com/Shabeehak/ClarifyProductsAI/actions/workflows/ci.yml/badge.svg)](https://github.com/Shabeehak/ClarifyProductsAI/actions)
+
 # ClarifyProducts.AI
 **AI-Powered Product Review Intelligence Platform**
 
