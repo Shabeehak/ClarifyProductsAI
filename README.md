@@ -57,8 +57,8 @@ Conversational AI chatbot powered by Gemini that helps you:
 
 ### 🌐 **Live Application (Deployed on Google Cloud Platform)**
 
-**Frontend (Streamlit UI):** [http://136.114.42.68:8501](http://136.114.42.68:8501)
-**Backend API (FastAPI):** [http://136.114.42.68:8000/docs](http://136.114.42.68:8000/docs)
+**Frontend (Streamlit UI):** [http://34.46.44.69:8501](http://34.46.44.69:8501)
+**Backend API (FastAPI):** [http://34.46.44.69:8000/docs](http://34.46.44.69:8000/docs)
 
 **Deployment Specs:**
 - **Platform**: Google Cloud Platform (GCP) e2-standard-2
