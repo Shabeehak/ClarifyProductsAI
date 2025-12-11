@@ -3,8 +3,16 @@ name: CI - Continuous Integration
 on:
   push:
     branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'           # Ignore all markdown files
+      - 'docs/**'         # Ignore docs folder
+      - 'screenshots/**'  # Ignore screenshots
   pull_request:
     branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'screenshots/**'
 
 jobs:
   lint-and-test:
